@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700');
+
+$display-text: 'Roboto', sans-serif;;
+
+// FONT WEIGHTS
+$thin:      100;
+$light:     300;
+$regular:   400;
+$medium:    500;
+$semi-bold: 600;
+$bold:      700;
+
+// SIZE in rem
+$r16: 1rem;
+$r15: 0.9375rem;
+$r14: 0.875rem;
+$r13: 0.8125rem;
+$r12: 0.75rem;
+$r11: 0.6875rem;
+$r10: 0.625rem;
+$r9:  0.5625rem;
+
+// COLORS
+$orange:     #2180de;
+$green:      #2180de;
+$dark-gray:  #333333;
+$light-gray: #bcbcbc;
+$white:      #fff;
+$red:        #ff6347;
+
+$primary-theme-color:   $orange;
+$secondary-theme-color: $green;
+$primary-text-color:    $dark-gray;
+$secondary-text-color:  $light-gray;
+
+// BREAKPOINTS
+$pc-lg:      100.313em; //1605px
+$pc-md:      87.813em;  //1405px
+$laptop-md:  85.625em;  //1370px
+$laptop-sm:  80.313em;  //1285px
+$laptop-xs:  64.063em;  //1025px
+$tablet:     50.000em;  //800px;
+$mobile-xlg: 37.813em;  //605px;
+$mobile-lg:  31.250em;  //500px;
+$mobile-md:  28.125em;  //450px;
+$mobile-sm:  23.750em;  //380px;
+$mobile-sm2: 23.313em;  //373px;
+$mobile-xs:  21.875em;  //350px;

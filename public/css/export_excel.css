@@ -1,0 +1,45 @@
+
+body
+{
+	font-family: Georgia, serif;
+	/*font-size: 11px;*/
+
+}
+
+table tr td,table tr th
+{
+	text-align: center;
+	min-width:30 !important;
+	padding:0px,50px,0px,50px;
+	/*font-size:10px !important;*/
+	
+}
+div.table-header-container table
+{
+	border:none;
+	text-align: center !important;
+}
+div.table-top-container div.table-top-container table tr td
+{
+	border:2px solid #5555;
+	/*font-size:12px !important;*/
+	font-weight: bold;
+
+	
+}
+div.table-body-container table tr th,div.table-body-container table tr td
+{
+	border:2px solid #5555;
+	
+}
+
+div.table-footer-container table tr td
+{
+	/*font-size:8px;*/
+	font-weight: bold;
+}
+span.highlight-text
+{
+	/*font-size:10px !important;*/
+	font-weight: bold;
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sales Report</title>
+        <style>
+        @page
+        {
+            size: Legal landscape;
+            margin: 0.4in;
+        }
+        </style>
+        <link href="{{ public_path('css/export_pdf.css') }}" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div class="header-container">
+            <div class="header-text">Admin Sales Report</div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div>
+            <div class="box-border">
+                <div class="box-border-content">
+                    <div class="table-container">
+                        <table >
+                            <tr>
+                                <th class="text-center">Receipt No</th>
+                                <th class="text-center">Customer Name</th>
+                                <th class="text-center">Item Name</th>
+                                <th class="text-center">Price</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Tax Rate</th>
+                                <th class="text-center">Tax</th>
+                                <th class="text-center">Total</th>
+                            </tr>
+                            @foreach($_list as $list)
+                            <tr>
+                            <td class="text-center text-secondary v-align-middle">{{$list['receipt_id']}}</td>
+                            <td class="text-center text-secondary v-align-middle">{{$list['buyer_name']}}</td>
+
+                                <td class="text-center text-secondary v-align-middle">
+                                @foreach($list['items'] as $item)
+                                    <div>
+                                        {{$item->item_sku}}
+                                    </div>
+                                @endforeach
+                                </td>
+                                <td class="text-center text-secondary v-align-middle">
+                                @foreach($list['items'] as $item)
+                                    <div>
+                                        {{$item->item_price}}
+                                    </div>
+                                @endforeach
+                                </td>
+                                <td class="text-center text-secondary v-align-middle">
+                                @foreach($list['items'] as $item)
+                                    <div>
+                                        {{$item->quantity}}
+                                    </div>
+                                @endforeach
+                                </td>
+                                <td class="text-center text-secondary v-align-middle">PHP {{$list['subtotal'] }}</td>
+                                <td class="text-center text-secondary v-align-middle">{{$list['tax_amount'] == 0 ? '0' : '12%'}}</td>
+                                <td class="text-center text-secondary v-align-middle">PHP {{$list['tax_amount'] }}</td>
+                                <td class="text-center text-secondary v-align-middle">PHP {{$list['grand_total'] }}</td>
+                            </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                </div>
+            </div>
+			
+        </div>
+        <br>
+		
+        <br><br><br>
+    </body>
+</html>

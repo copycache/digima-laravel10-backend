@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Domus Naturae - Project Setup Guide</title>
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #3498db;
+                --accent-color: #e74c3c;
+                --bg-color: #f8f9fa;
+                --text-color: #333;
+                --code-bg: #282c34;
+                --code-text: #abb2bf;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: var(--text-color);
+                background-color: var(--bg-color);
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 40px auto;
+                background: white;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                color: var(--primary-color);
+                border-bottom: 2px solid var(--secondary-color);
+                padding-bottom: 10px;
+                margin-bottom: 30px;
+            }
+
+            h2 {
+                color: var(--primary-color);
+                margin-top: 40px;
+                border-left: 5px solid var(--secondary-color);
+                padding-left: 15px;
+            }
+
+            h3 {
+                color: #555;
+                margin-top: 25px;
+            }
+
+            ul {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            li {
+                padding: 5px 0;
+                padding-left: 20px;
+                position: relative;
+            }
+
+            li::before {
+                content: "•";
+                color: var(--secondary-color);
+                font-weight: bold;
+                display: inline-block;
+                width: 1em;
+                margin-left: -1em;
+            }
+
+            code {
+                font-family: "Consolas", "Monaco", "Courier New", monospace;
+                background-color: #eee;
+                padding: 2px 5px;
+                border-radius: 4px;
+                color: #d63384;
+            }
+
+            pre {
+                background-color: var(--code-bg);
+                color: var(--code-text);
+                padding: 15px;
+                border-radius: 6px;
+                overflow-x: auto;
+                border-left: 4px solid var(--secondary-color);
+            }
+
+            pre code {
+                background-color: transparent;
+                color: inherit;
+                padding: 0;
+            }
+
+            .alert {
+                background-color: #fff3cd;
+                border: 1px solid #ffeeba;
+                color: #856404;
+                padding: 15px;
+                border-radius: 6px;
+                margin: 20px 0;
+                border-left: 5px solid #ffc107;
+            }
+
+            .step-number {
+                display: inline-block;
+                background-color: var(--secondary-color);
+                color: white;
+                width: 24px;
+                height: 24px;
+                text-align: center;
+                border-radius: 50%;
+                margin-right: 10px;
+                font-size: 0.9em;
+                line-height: 24px;
+            }
+
+            footer {
+                text-align: center;
+                margin-top: 50px;
+                color: #888;
+                font-size: 0.9em;
+            }
+
+            .troubleshooting-item {
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                padding: 20px;
+                margin-bottom: 20px;
+                background-color: #fff;
+            }
+
+            .troubleshooting-title {
+                font-weight: bold;
+                color: var(--accent-color);
+                margin-bottom: 10px;
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Project Setup Guide</h1>
+            <p>
+                This guide describes how to set up the
+                <strong>Domus Naturae</strong> project locally. It covers both
+                the Laravel 10 Backend and Angular Frontend.
+            </p>
+
+            <div class="alert">
+                <strong>Prerequisites:</strong> Ensure you have PHP 8.1+,
+                Composer, Node.js, NPM/Yarn, and MySQL installed.
+            </div>
+
+            <h2>1. Backend Setup (Laravel 10)</h2>
+            <p>
+                Navigate to the backend directory:
+                <code>domus-naturae-backend-laravel10</code>
+            </p>
+
+            <h3><span class="step-number">1</span>Install Dependencies</h3>
+            <pre><code>composer install</code></pre>
+            <p>
+                <em
+                    >This will install all PHP packages required by the
+                    application.</em
+                >
+            </p>
+
+            <h3><span class="step-number">2</span>Environment Configuration</h3>
+            <ul>
+                <li>
+                    Copy the example environment file:
+                    <pre><code>cp .env.example .env</code></pre>
+                </li>
+                <li>
+                    Open <code>.env</code> and configure your database settings:
+                    <pre><code>DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_username
+DB_PASSWORD=your_password</code></pre>
+                </li>
+                <li>
+                    Generate the application key:
+                    <pre><code>php artisan key:generate</code></pre>
+                </li>
+            </ul>
+
+            <h3>
+                <span class="step-number">3</span>Database Migration & Seeding
+            </h3>
+            <pre><code>php artisan migrate
+php artisan db:seed</code></pre>
+
+            <h3><span class="step-number">4</span>Run the Server</h3>
+            <pre><code>php artisan serve</code></pre>
+            <p>
+                The backend will be available at:
+                <a href="http://127.0.0.1:8000" target="_blank"
+                    >http://127.0.0.1:8000</a
+                >
+            </p>
+
+            <h2>2. Frontend Setup (Angular)</h2>
+            <p>
+                Navigate to the frontend directory:
+                <code>domus-naturae-frontend</code>
+            </p>
+
+            <h3><span class="step-number">1</span>Install Dependencies</h3>
+            <pre><code>npm install
+# OR
+yarn install</code></pre>
+
+            <h3><span class="step-number">2</span>Run the Server</h3>
+            <pre><code>ng serve</code></pre>
+            <p>
+                The frontend will be available at:
+                <a href="http://localhost:4200" target="_blank"
+                    >http://localhost:4200</a
+                >
+            </p>
+
+            <h2>3. Connecting Frontend to Backend</h2>
+            <p>
+                Ensure the frontend is pointing to the correct backend URL.
+                Check <code>src/environments/environment.ts</code> to verify the
+                API URL matches your Laravel server (usually
+                <code>http://127.0.0.1:8000/api</code>).
+            </p>
+
+            <h2>Troubleshooting</h2>
+
+            <div class="troubleshooting-item">
+                <span class="troubleshooting-title"
+                    >Problem: "Install or enable PHP's gd extension"</span
+                >
+                <p>If you see an error about <code>ext-gd</code> missing:</p>
+                <ol>
+                    <li>
+                        Run <code>php --ini</code> to find your
+                        <code>php.ini</code> file.
+                    </li>
+                    <li>
+                        Open it and find the line <code>;extension=gd</code>.
+                    </li>
+                    <li>
+                        Remove the semicolon <code>;</code> to uncomment it:
+                        <code>extension=gd</code>.
+                    </li>
+                    <li>Save and retry.</li>
+                </ol>
+            </div>
+
+            <div class="troubleshooting-item">
+                <span class="troubleshooting-title"
+                    >Problem: Missing Extensions (zip)</span
+                >
+                <p>If you see an error about <code>ext-zip</code> missing:</p>
+                <ol>
+                    <li>Open <code>php.ini</code>.</li>
+                    <li>
+                        Uncomment <code>extension=zip</code> (remove the leading
+                        <code>;</code>).
+                    </li>
+                    <li>Save and retry.</li>
+                </ol>
+            </div>
+
+            <div class="troubleshooting-item">
+                <span class="troubleshooting-title"
+                    >Problem: Version Mismatch / Lock File Error</span
+                >
+                <p>
+                    If <code>composer install</code> fails due to PHP version
+                    conflicts:
+                </p>
+                <p>
+                    <strong>Do not</strong> use <code>composer install</code>.
+                    Instead, run:
+                </p>
+                <pre><code>composer update -W</code></pre>
+                <p>
+                    This regenerates the lock file for your current PHP version.
+                </p>
+            </div>
+
+            <footer>
+                <p>Domus Naturae Development Team &copy; 2026</p>
+            </footer>
+        </div>
+    </body>
+</html>

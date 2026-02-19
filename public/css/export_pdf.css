@@ -1,0 +1,84 @@
+body
+{
+	font-family:sans-serif;
+}
+div.header-container
+{
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+	margin-bottom: 10px;
+
+}
+div.header-text
+{
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
+}
+div.box-content-id
+{
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+}
+div.header-id
+{
+	position: absolute;
+	right: 5px;
+
+}
+div.box-border
+{
+	border:1px solid gray;
+}
+table, th, td
+{
+	text-align: center;
+	border: 1px solid gray;
+	border-collapse: collapse;
+	width:100%;
+}
+div.table-container table th
+{
+	font-size:11px !important;
+	font-weight: bold !important;
+}
+div.table-container table td
+{
+	font-size:13px !important;
+}
+div.pdf-footer
+{
+	font-size:8px !important;
+	font-weight: bold !important;
+	text-align: center;
+	margin-top:30px;
+}
+div.checkbox-info input
+{
+	vertical-align: bottom;
+}
+div.checkbox-info
+{
+	font-size:13px;	
+
+}
+div.checkbox-container
+{
+	position: relative;	
+	height: 50px;
+	margin-right: 5px;
+}
+div.checkbox-holder
+{
+	position: absolute;
+	float: right;
+}
+
+.list-info
+{
+	font-size:12px;
+}
