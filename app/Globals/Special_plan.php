@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 
 use App\Models\Tbl_sponsor_matching;
 use App\Models\Tbl_mlm_plan;

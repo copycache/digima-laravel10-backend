@@ -52,12 +52,12 @@ use App\Globals\User_process;
 use App\Globals\Stairstep;
 use App\Globals\Mlm_complan_manager;
 use App\Models\Tbl_code_alias;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
+use Validator;
+use Crypt;
+use Hash;
+use Request;
 
 class Slot
 {
@@ -296,27 +296,27 @@ class Slot
 					   			 DB::raw("DATE_FORMAT(tbl_slot.slot_date_created, '%m/%d/%Y (%h:%i %p)') as slot_date_created"),
 					   	         DB::raw("DATE_FORMAT(tbl_slot.slot_date_placed, '%m/%d/%Y (%h:%i %p)') as slot_date_placed_new"));
 
-		if(isset($filter['kyc_status']) && $filter['kyc_status'] != 'all')
+		if($filter['kyc_status'] != 'all')
 		{
 			$query->where("users.verified",$filter["kyc_status"]);
 		}
-		if(isset($filter['membership']) && $filter['membership'] != 'all')
+		if($filter['membership'] != 'all')
 		{
 			$query->where('membership_name', $filter['membership']);
 		}
 
-		if(isset($filter['type']) && $filter['type'] != 'all')
+		if($filter['type'] != 'all')
 		{
 			$query->where('tbl_slot.slot_type', $filter['type']);
 		}
 
-		if(isset($filter['ranking']) && $filter['ranking'] != 'all')
+		if($filter['ranking'] != 'all')
 		{
 			$stairstep_rank 	= Tbl_stairstep_rank::where('stairstep_rank_name', $filter['ranking'])->first();
 			$query->where('tbl_slot.slot_stairstep_rank', $stairstep_rank->stairstep_rank_id);
 		}
 
-		if(isset($filter['search']) && $filter['search'] != '' && $filter['search'] != null)
+		if($filter['search'] != '' || $filter['search'] != null)
 		{
 			if($user_slot_owner == $active_user_id)
 			{
@@ -1913,20 +1913,20 @@ class Slot
 
 	public static function get_slot_earnings($data, $limit = null)
 	{
-		$query = Tbl_earning_log::where("tbl_earning_log.earning_log_slot_id", $data["id"] ?? null);
+		$query = Tbl_earning_log::where("tbl_earning_log.earning_log_slot_id", $data["id"]);
 		$query = $query->leftJoin("tbl_slot", "tbl_slot.slot_id", "=", "tbl_earning_log.earning_log_slot_id");
 
-		if ($data["search"] ?? null)
+		if ($data["search"])
 		{
 			$query = $query->where("tbl_slot.slot_no", 'LIKE', '%' . $data["search"] . '%');
 		}
 
-		if (($data["from"] ?? null) && ($data["to"] ?? null))
+		if ($data["from"] && $data["to"])
 		{
 			$query = $query->whereBetween("tbl_earning_log.earning_log_date_created", [$data["from"], $data["to"]]);
 		}
 
-		if (($data["type"] ?? null) && ($data["type"] ?? null) != "all")
+		if ($data["type"] && $data["type"] != "all")
 		{
 			$query = $query->where("tbl_earning_log.earning_log_plan_type", $data["type"]);
 		}
@@ -1957,22 +1957,22 @@ class Slot
 
 	public static function get_slot_distributed($data, $limit = null)
 	{
-		$query = Tbl_earning_log::where("tbl_earning_log.earning_log_cause_id", $data["id"] ?? null);
+		$query = Tbl_earning_log::where("tbl_earning_log.earning_log_cause_id", $data["id"]);
 		$query = $query->leftJoin("tbl_slot", "tbl_slot.slot_id", "=", "tbl_earning_log.earning_log_cause_id");
 
-		if ($data["search"] ?? null)
+		if ($data["search"])
 		{
 			$query = $query->where("tbl_slot.slot_no", 'LIKE', '%' . $data["search"] . '%');
 		}
 
-		if (($data["from"] ?? null) && ($data["to"] ?? null))
+		if ($data["from"] && $data["to"])
 		{
 			$query = $query->whereBetween("tbl_earning_log.earning_log_date_created", [$data["from"], $data["to"]]);
 		}
 
-		if (($data["type"] ?? null) && ($data["type"] ?? null) != "all")
+		if ($data["type"] && $data["type"] != "all")
 		{
-			$query = $query->where("tbl_earning_log.earning_log_plan_type", $data["earning_log_plan_type"] ?? null);
+			$query = $query->where("tbl_earning_log.earning_log_plan_type", $data["earning_log_plan_type"]);
 		}
 
 		if ($limit)
@@ -2004,10 +2004,10 @@ class Slot
 	public static function get_slot_wallet($data, $limit = null)
 	{
 		// dd($data);
-		$query = Tbl_wallet_log::where("tbl_wallet_log.wallet_log_slot_id", $data["id"] ?? null);
+		$query = Tbl_wallet_log::where("tbl_wallet_log.wallet_log_slot_id", $data["id"]);
 		$query = $query->leftJoin("tbl_slot", "tbl_slot.slot_id", "=", "tbl_wallet_log.wallet_log_slot_id");
 
-		if (($data["from"] ?? null) && ($data["from"] ?? null) != "null" && ($data["to"] ?? null) && ($data["to"] ?? null) != "null")
+		if ($data["from"] && $data["from"] != "null" && $data["to"] && $data["to"] != "null")
 		{
 			$query = $query->whereBetween("tbl_wallet_log.wallet_log_date_created", [$data["from"], $data["to"]]);
 		}
@@ -2033,10 +2033,10 @@ class Slot
 
 	public static function get_slot_payout($data, $limit = null)
 	{
-		$query = Tbl_wallet_log::where("tbl_wallet_log.wallet_log_slot_id", $data["id"] ?? null)->where('wallet_log_details','CASH OUT');
+		$query = Tbl_wallet_log::where("tbl_wallet_log.wallet_log_slot_id", $data["id"])->where('wallet_log_details','CASH OUT');
 		$query = $query->leftJoin("tbl_slot", "tbl_slot.slot_id", "=", "tbl_wallet_log.wallet_log_slot_id");
 
-		if (($data["from"] ?? null) && ($data["from"] ?? null) != "null" && ($data["to"] ?? null) && ($data["to"] ?? null) != "null")
+		if ($data["from"] && $data["from"] != "null" && $data["to"] && $data["to"] != "null")
 		{
 			$query = $query->whereBetween("tbl_wallet_log.wallet_log_date_created", [$data["from"], $data["to"]]);
 		}
@@ -2062,15 +2062,15 @@ class Slot
 
 	public static function get_slot_points($data, $limit = null)
 	{
-		$query = Tbl_points_log::where("tbl_points_log.points_log_slot_id", $data["id"] ?? null);
+		$query = Tbl_points_log::where("tbl_points_log.points_log_slot_id", $data["id"]);
 		$query = $query->leftJoin("tbl_slot", "tbl_slot.slot_id", "=", "tbl_points_log.points_log_slot_id");
 
-		if (($data["from"] ?? null) && ($data["from"] ?? null) != "null" && ($data["to"] ?? null) && ($data["to"] ?? null) != "null")
+		if ($data["from"] && $data["from"] != "null" && $data["to"] && $data["to"] != "null")
 		{
 			$query = $query->whereBetween("tbl_points_log.points_log_date_created", [$data["from"], $data["to"]]);
 		}
 
-		if (($data["type"] ?? null) && ($data["type"] ?? null) != "all")
+		if ($data["type"] && $data["type"] != "all")
 		{
 			$query = $query->where("tbl_points_log.points_log_type", $data["type"]);
 		}
@@ -2111,30 +2111,29 @@ class Slot
 
 	public static function get_slot_network($data, $limit = null)
 	{
-		$type  = $data["type"] ?? null;
+		$type  = $data["type"];
 		if(!$type)
 		{
 			$type = "placement";
 		}
-		$id = $data["id"] ?? null;
 		if($type == "placement")
 		{
-			$query = Tbl_tree_placement::where("placement_parent_id", $id)->child()->orderBy("placement_level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
+			$query = Tbl_tree_placement::where("placement_parent_id", $data["id"])->child()->orderBy("placement_level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
 		}
 		else if($type == "sponsor")
 		{
-			$query = Tbl_tree_sponsor::where("sponsor_parent_id", $id)->child()->orderBy("sponsor_level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
+			$query = Tbl_tree_sponsor::where("sponsor_parent_id", $data["id"])->child()->orderBy("sponsor_level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
 		}
 		else if($type == "matrix")
 		{
-			$query = Tbl_matrix_placement::where("parent_id", $id)->child()->orderBy("level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
+			$query = Tbl_matrix_placement::where("parent_id", $data["id"])->child()->orderBy("level","ASC")->leftJoin("users","users.id","=","tbl_slot.slot_owner");
 		}
-		if($data["search"] ?? null)
+		if($data["search"])
 		{
 			$query = $query->where('tbl_slot.slot_no', 'LIKE', '%' . $data["search"] . '%')
                 		   ->orWhere('users.name','LIKE','%' . $data["search"] . '%');
 		}
-		if(($data["level"] ?? null) && ($data["level"] ?? null) != "all")
+		if($data["level"] && $data["level"] != "all")
 		{
 			$query = $query->where($type."_level",$data["level"]);
 		}
@@ -2238,7 +2237,7 @@ class Slot
 		// Define the prefix
 		$check_alias = Tbl_code_alias::first();
 
-		$prefix = $check_alias->code_alias_name ?? 'DN';
+		$prefix = $check_alias->code_alias_name ?? 'IEC';
 
 		if (!$check_alias) {
 			Tbl_code_alias::insert(['code_alias_name' => $prefix]);

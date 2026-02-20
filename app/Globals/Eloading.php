@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Tbl_eloading_product;
 use App\Models\Tbl_wallet;
 use App\Models\Tbl_wallet_log;

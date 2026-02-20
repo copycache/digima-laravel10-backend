@@ -3,10 +3,10 @@ namespace App\Globals;
 
 use App\Models\Tbl_achievers_rank;
 use App\Models\Tbl_welcome_bonus_commissions;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
+use DB;
+use Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 use App\Models\Tbl_membership;
 use App\Models\Tbl_membership_income;
 use App\Models\Tbl_mlm_plan;

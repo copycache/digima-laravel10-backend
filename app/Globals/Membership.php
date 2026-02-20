@@ -12,10 +12,10 @@ use App\Models\Tbl_binary_settings;
 use App\Models\Tbl_mlm_plan;
 use App\Models\Tbl_membership;
 use App\Models\Tbl_membership_indirect_level;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
+use DB;
+use Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 class Membership
 {
 	public static function add($data)

@@ -5,10 +5,10 @@ use App\Models\Tbl_currency;
 use App\Models\Tbl_currency_conversion;
 use App\Globals\CashOut;
 use App\Globals\Audit_trail;
-use Illuminate\Support\Facades\Request;
+use Request;
 use App\Globals\Log;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use DB;
 
 
 class Currency

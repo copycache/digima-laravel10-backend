@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
 
 use App\Globals\MLM;

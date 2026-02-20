@@ -1,10 +1,10 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
+use Hash;
+use Crypt;
 use Schema;
 use App\Globals\Eloading;
 use App\Models\Tbl_eloading_settings;
@@ -54,11 +54,6 @@ class Seed
 		Seed::marketing_tools_subcategory_seed();
 		Seed::matrix_bonus_settings_seed();
 		Seed::livewell_rank_seed();
-		Seed::milestone_bonus_seed();
-		Seed::monoline_settings_seed();
-		Seed::unilevel_settings_seed();
-		Seed::binary_settings_seed();
-		Seed::label_seed();
 		
         $return["status"]         = "success";
         $return["status_code"]    = 1;
@@ -114,7 +109,7 @@ class Seed
 		}
 
 		$feature = ['send_wallet','conversion_wallet','product_replicated', 'store_replicated', 'auto_distribute', 'code_transfer', 'website_maintenance', 'code_transfer_non'];
-		
+
 		foreach ($feature as $key => $value)
 		{
 			$check = DB::table('tbl_mlm_feature')->where('mlm_feature_name',$value)->first();
@@ -124,18 +119,7 @@ class Seed
 				DB::table('tbl_mlm_feature')->insert($featured);
 			}
 		}
-
-		// Seed cash out settings if not exists
-		$cash_out_settings = DB::table('tbl_cash_out_settings')->first();
-		if(!$cash_out_settings)
-		{
-			DB::table('tbl_cash_out_settings')->insert([
-				'cash_out_settings_per_day' => 0,
-				'cash_out_settings_per_date' => 1
-			]);
-		}
 	}
-
 
 	public static function tab_module_seed()
 	{
@@ -278,7 +262,7 @@ class Seed
 		// $label   = ['Binary','Direct','Unilevel Bonus','Override Bonus','Indirect Referral Bonus'];
 		$trigger = ['Slot Placement','Slot Creation','Slot Repurchase','Slot Repurchase','Slot Creation','Slot Repurchase', 'Slot Creation' ,'Slot Creation','Slot Creation','Slot Placement','Slot Repurchase','Slot Creation','Slot Repurchase','Slot Repurchase', 'Slot Creation', 'Special Plan','Slot Distribute','Special Plan','Special Plan','Special Plan','Special Plan','Special Plan','Slot Creation','Product Purchase','Slot Creation',"Product Purchase","Product Purchase","Product Repurchase",'Special Plan','Product Purchase','Product Purchase','Referral','Product Purchase','Product Purchase','Product Purchase','Product Purchase','Slot Creation','Special Plan','Special Plan','Slot Creation', 'Slot Creation', 'Special Plan','Slot Repurchase', 'Slot Creation', 'Slot Repurchase', 'Slot Placement', 'Special Plan', 'Slot Placement', 'Slot Creation'];
 
-	 	foreach($code as $key => $value)
+		foreach($code as $key => $value)
 		{
 			$insert["mlm_plan_code"]    = $value;
 			$insert["mlm_plan_label"]   = "";
@@ -347,7 +331,7 @@ class Seed
 			if(!$admin_id)
 			{
 				$insert_admin["name"]			= "Administrator";
-				$insert_admin["email"]			= "domusnaturae@digima.com";
+				$insert_admin["email"]			= "iqonelitecorp@digima.com";
 				$insert_admin["password"]		= Hash::make("@dGmW3b2025");
 				$insert_admin["remember_token"]	= null;
 				$insert_admin["created_at"]		= Carbon::now();
@@ -531,9 +515,8 @@ class Seed
 
 		if($count == 0)
 		{
-			// DB::statement("ALTER TABLE tbl_item AUTO_INCREMENT =  1");
+			DB::statement("ALTER TABLE tbl_item AUTO_INCREMENT =  1");
 
-			$insert["item_id"]              			= 1;
 			$insert["item_sku"]              			= "Sample Item";
 			$insert["item_description"]              	= "Sample Item";
 			$insert["item_barcode"]              		= "11101";
@@ -731,7 +714,7 @@ class Seed
         }
         else
         {
-            DB::unprepared(file_get_contents(base_path('public/sql/refCitymun.sql')));
+            DB::unprepared(file_get_contents('sql/refCitymun.sql'));
         }
 
         if(Schema::hasTable('refbrgy'))
@@ -740,7 +723,7 @@ class Seed
         }
         else
         {
-            DB::unprepared(file_get_contents(base_path('public/sql/refBrgy.sql')));
+            DB::unprepared(file_get_contents('sql/refBrgy.sql'));
         }
 
         if(Schema::hasTable('refprovince'))
@@ -749,7 +732,7 @@ class Seed
         }
         else
         {
-            DB::unprepared(file_get_contents(base_path('public/sql/refProvince.sql')));
+            DB::unprepared(file_get_contents('sql/refProvince.sql'));
         }
         if(Schema::hasTable('refregion'))
         {
@@ -757,7 +740,7 @@ class Seed
         }
         else
         {
-            DB::unprepared(file_get_contents(base_path('public/sql/refRegion.sql')));
+            DB::unprepared(file_get_contents('sql/refRegion.sql'));
         }
 
         // dd($message);
@@ -1128,113 +1111,6 @@ class Seed
 			];
 			
 			DB::table("tbl_livewell_rank")->insert($insert);
-		}
-	}
-
-	public static function milestone_bonus_seed()
-	{
-		$settingsExists = DB::table('tbl_milestone_bonus_settings')->exists();
-		if(!$settingsExists) {
-			$insertData = [
-				"milestone_type_limit" => 'pairs',
-				"milestone_cycle_limit" => null,
-				"created_at" => Carbon::now(),
-			];
-			DB::table('tbl_milestone_bonus_settings')->insert($insertData);
-		}
-	}
-
-	public static function monoline_settings_seed()
-	{
-		$memberships = DB::table('tbl_membership')->where('archive', 0)->get();
-		foreach($memberships as $membership) {
-			$check = DB::table('tbl_mlm_monoline_settings')->where('membership_id', $membership->membership_id)->first();
-			if(!$check) {
-				DB::table('tbl_mlm_monoline_settings')->insert([
-					'membership_id' => $membership->membership_id,
-					'max_price' => 0,
-					'monoline_percent' => 0,
-					'monoline_points' => 0,
-				]);
-			}
-		}
-	}
-
-	public static function unilevel_settings_seed()
-	{
-		$count = DB::table('tbl_mlm_unilevel_settings')->count();
-		if($count == 0)
-		{
-			DB::table('tbl_mlm_unilevel_settings')->insert([
-				'personal_as_group' => 0,
-				'gpv_to_wallet_conversion' => 0,
-				'personal_pv_label' => 'Personal PV',
-				'group_pv_label' => 'Group PV',
-				'is_dynamic' => 'normal',
-				'unilevel_complan_show_to' => 0,
-				'unilevel_level_based_by' => 'membership',
-				'unilevel_maintenance_based_by' => 'membership',
-				'auto_ship' => 0,
-			]);
-		}
-	}
-
-	public static function binary_settings_seed()
-	{
-		$count = DB::table('tbl_binary_settings')->count();
-		if($count == 0)
-		{
-			DB::table('tbl_binary_settings')->insert([
-				'auto_placement' => 0,
-				'auto_placement_type' => 'lesser',
-				'member_disable_auto_position' => 0,
-				'member_default_position' => 'LEFT',
-				'strong_leg_retention' => 0,
-				'gc_pairing_count' => 0,
-				'cycle_per_day' => 0,
-				'crossline' => 0,
-				'included_binary_repurchase' => 0,
-				'gc_paring_amount' => 0,
-				'amount_binary_limit' => 0,
-				'strong_leg_limit_points' => 0,
-				'sponsor_matching_cycle' => 1,
-				'sponsor_matching_limit' => 0,
-				'mentors_matching_cycle' => 1,
-				'mentors_matching_limit' => 0,
-				'binary_points_enable' => 0,
-				'binary_points_minimum_conversion' => 0,
-				'mentors_points_enable' => 0,
-				'mentors_points_minimum_conversion' => 0,
-				'binary_extreme_position' => 0,
-				'sponsor_selection' => 1,
-				'show_slot_tracker' => 1,
-				'show_earnings_tracker' => 1,
-				'show_earnings_tracker_per_cycle' => 1,
-				'binary_limit_type' => 1,
-				'binary_maximum_points_per_level_enable' => 0,
-				'binary_maximum_slot_per_level_enable' => 0,
-				'binary_required_direct_enable' => 0,
-				'binary_max_limit_based_by' => 'membership',
-				'mentors_level_based_by' => 'membership',
-				'binary_auto_placement_enable' => 0,
-				'binary_auto_placement_time' => 0,
-			]);
-		}
-	}
-
-	public static function label_seed()
-	{
-		$count = DB::table('tbl_label')->count();
-		if($count == 0)
-		{
-			$plans = DB::table('tbl_mlm_plan')->get();
-			foreach($plans as $plan)
-			{
-				DB::table('tbl_label')->insert([
-					'plan_code' => $plan->mlm_plan_code,
-					'plan_name' => ucwords(strtolower(str_replace('_', ' ', $plan->mlm_plan_code))),
-				]);
-			}
 		}
 	}
 }

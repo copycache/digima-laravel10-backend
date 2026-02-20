@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
 
 use App\Globals\Audit_trail;
@@ -12,10 +12,10 @@ use App\Models\Tbl_item;
 use App\Models\Users;
 
 use App\Models\Tbl_codes;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Request;
+use Validator;
+use Hash;
+use Crypt;
+use Request;
 
 class Branch
 {

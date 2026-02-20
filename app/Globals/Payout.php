@@ -1,11 +1,11 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
 
 
-use Illuminate\Support\Facades\Validator;
+use Validator;
 
 class Payout
 {

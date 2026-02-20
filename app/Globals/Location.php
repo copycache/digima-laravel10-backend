@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Refregion;
 use App\Models\Refprovince;
 use App\Models\Refcitymun;

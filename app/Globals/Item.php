@@ -44,9 +44,9 @@ use App\Models\Tbl_retailer_override;
 
 use App\Models\Users;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Validator;
+use DB;
+use Request;
+use Validator;
 
 class Item
 {
@@ -849,7 +849,7 @@ class Item
     }
     public static function get_inventory($data)
     {
-        $items = Tbl_item::Unarchived()->JoinInventory()->where('tbl_inventory.inventory_branch_id', $data['branch_id'] ?? null)->get();
+        $items = Tbl_item::Unarchived()->JoinInventory()->where('tbl_inventory.inventory_branch_id', $data['branch_id'])->get();
         foreach ($items as $key => $value) {
             $items[$key]->used_codes = Tbl_item::Unarchived()->JoinInventory()->JoinCodesInventory()->where('tbl_inventory.inventory_id', $value->inventory_id)->Used()->count();
             $items[$key]->sold_codes = Tbl_item::Unarchived()->JoinInventory()->JoinCodesInventory()->where('tbl_inventory.inventory_id', $value->inventory_id)->Sold()->count();

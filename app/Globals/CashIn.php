@@ -1,9 +1,9 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
+use Request;
 use App\Models\Tbl_cash_in_proofs;
 use App\Models\Tbl_cash_in_method;
 use App\Models\Tbl_cash_in_method_category;
@@ -19,17 +19,17 @@ use App\Models\Tbl_retailer;
 use App\Models\Tbl_user_process;
 
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+use Validator;
+use Hash;
 use Excel;
 class CashIn
 {
 	public static function get_transactions($params = null, $slot_owner = null)
 	{
 		// dd($params['user']);
-		if(isset($params['user']) && $params['user'] == 'admin1')
+		if($params['user'] == 'admin1')
 		{
-			if(isset($params['position']) && ($params['position'] == 'superadmin' || $params['position'] == 'admin1'))
+			if($params['position'] == 'superadmin' || $params['position'] == 'admin1')
 			{
 				$data  							= Tbl_cash_in_proofs::method();
 			}

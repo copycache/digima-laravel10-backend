@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Tbl_membership;
 use App\Models\Tbl_payout_method;
 use App\Models\Tbl_payout_charge;

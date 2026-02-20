@@ -1,8 +1,8 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
+use DB;
+use Session;
 use Carbon\Carbon;
 use App\Models\Tbl_cart;
 

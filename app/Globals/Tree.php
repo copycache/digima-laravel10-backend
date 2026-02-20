@@ -8,7 +8,7 @@ use App\Models\Tbl_mlm_board_slot;
 use App\Models\Tbl_matrix_placement;
 
 
-use Illuminate\Support\Facades\DB;
+use DB;
 class Tree
 {	
     public static function insert_tree_placement($slot_info, $new_slot, $level,$placement=null)

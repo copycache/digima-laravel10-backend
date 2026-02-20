@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Tbl_vortex_settings;
 use App\Models\Tbl_vortex_slot;
 use App\Models\Tbl_vortex_token_log;

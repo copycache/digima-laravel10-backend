@@ -2,9 +2,9 @@
 namespace App\Globals;
 
 use App\Models\Tbl_dropshipping_list;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
+use Request;
 use App\Models\Tbl_cashier;
 use App\Models\Tbl_inventory;
 use App\Models\Users;
@@ -27,9 +27,9 @@ use App\Models\Tbl_orders_for_approval;
 use App\Models\Tbl_cod_list;
 
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
+use Validator;
+use Hash;
+use Crypt;
 use App\Models\Tbl_wallet;
 use App\Globals\MLM;
 use App\Globals\Audit_trail;
@@ -902,10 +902,6 @@ class Cashier
 				}
 			
 				$order_id = Tbl_orders::insertGetId($insert);
-				
-				$update['transaction_id']	= Cashier::generate_transaction_id($order_id);
-				Tbl_orders::where("order_id", $order_id)->update($update);
-
 				$x = 0;
 				$dd = json_decode($ordered_item);
 				foreach($dd as $key3 => $value3)
@@ -1499,9 +1495,6 @@ class Cashier
 		
 			$order_id = Tbl_orders::insertGetId($insert);
 			
-			$update['transaction_id']	= Cashier::generate_transaction_id($order_id);
-			Tbl_orders::where("order_id", $order_id)->update($update);
-
 			if($from != 'cashier' && $from != 'stockist')
 			{
 				if($dragonpay_status == 0)
@@ -1723,9 +1716,6 @@ class Cashier
 				$insert['handling_fee']			= $handling_fee;
 			
 				$order_id = Tbl_orders::insertGetId($insert);
-				
-				$update['transaction_id'] = Cashier::generate_transaction_id($order_id);
-				Tbl_orders::where("order_id", $order_id)->update($update);
 
 				$x = 0;
 				$order_item = json_decode($ordered_item);
@@ -1768,10 +1758,5 @@ class Cashier
 				return $return;
 			}
 		}
-	}
-
-	public static function generate_transaction_id($order_id){
-		$padded_id = str_pad((int)$order_id, 3, '0', STR_PAD_LEFT);
-    	return 'TXN' . date('Ymd') . $padded_id;
 	}
 }

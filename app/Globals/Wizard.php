@@ -21,9 +21,9 @@ use App\Models\Tbl_payout_settings;
 use App\Models\Tbl_payout_method;
 use App\Models\Tbl_bank;
 use App\Models\Tbl_remittance;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 class Wizard
 {
 	public static function step_one($data,$data_company)

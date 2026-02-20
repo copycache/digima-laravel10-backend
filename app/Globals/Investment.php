@@ -6,8 +6,8 @@ use App\Models\Tbl_investment_package_logs;
 use App\Models\Tbl_investment_package_tag;
 use App\Globals\Log;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\DB;
+use Request;
+use DB;
 
 class InvestMent
 {

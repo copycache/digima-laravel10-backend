@@ -15,12 +15,12 @@ use App\Models\Tbl_retailer;
 use App\Models\Tbl_binary_settings;
 use App\Models\Tbl_binary_projected_income_log;
 use App\Models\Tbl_tree_placement;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
+use Validator;
+use Crypt;
+use Hash;
+use Request;
 use App\Globals\Slot;
 use App\Models\Tbl_binary_points;
 use App\Models\Tbl_earning_log;
@@ -141,10 +141,6 @@ class Member
 			$rules["password"]    		       = "required|alpha_num";
 			$rules["password_confirmation"]    = "required|same:password|alpha_num";
 		}
-			// Fix: Set default for register_platform if not set
-			if (!isset($data["register_platform"])) {
-				$data["register_platform"] = "system";
-			}
 		if($data["register_platform"] == "system")
 		{
 			$rules["email"]    		= "required|unique:users,email|email";

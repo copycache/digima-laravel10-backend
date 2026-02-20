@@ -53,6 +53,10 @@ use App\Exports\DragonpayOrdersExport;
 use App\Exports\PayoutExport;
 use App\Exports\TopSellerReportExport;
 use App\Exports\DynamicExport;
+use App\Exports\QueryExport;
+use App\Exports\PayoutScheduleExport;
+use App\Exports\PromoReportExport;
+use App\Exports\DragonpayPayoutExport;
 
 use App\Globals\Code;
 use Illuminate\Support\Facades\DB;
@@ -317,46 +321,12 @@ class AdminExportController extends AdminController
 		{
 			$data["methods"][$key]["transactions"] = Tbl_cash_out_list::where('schedule_id',$schedule->schedule_id)->where("tbl_cash_out_list.cash_out_method_id", $value->cash_out_method_id)->get();
 		}
-		$data['_bank']  =   ['Slot Code','Account Name','Account Number','Account Type','Email','Phone Number','TIN','Tax','Method Fee','Service Charge', 'Survey Charge', 'Product Charge','GC Charge','Savings','Amount Due','Net Payout','Date'];
-		$data['_remit']  =  ['Slot Code','Full Name','Full Address','Other Info','Email','Phone Number','TIN','Tax','Method Fee','Service Charge','Savings','Amount Due','Net Payout','Date'];
-		// dd($data);
-		Excel::create('Cashout', function($excel) use ($data)
-		{
-			$methods = $data['methods'];
-			foreach($methods as $keys => $method)
-			{
-				$data['method'] = $method;
-				$excel->sheet($method->cash_out_method_name, function($sheet) use($data)
-				{
-					$method = $data['method'];
-					$column = $method->cash_out_method_category == 'remittance' ? $data['_remit'] : $data['_bank'];
-					$sheet->fromArray($column, null, 'A1', false, false);
-					$sheet->freezeFirstRow();
-					foreach($method->transactions as  $key => $list)
-					{
-						$key = $key+=2;
-						$sheet->setCellValue('A'.$key, $list['cash_out_slot_code']);
-						$sheet->setCellValue('B'.$key, $list['cash_out_primary_info']);
-						$sheet->setCellValue('C'.$key, $list['cash_out_secondary_info']);
-						$sheet->setCellValue('D'.$key, $list['cash_out_optional_info']);
-						$sheet->setCellValue('E'.$key, $list['cash_out_email_address']);
-						$sheet->setCellValue('F'.$key, $list['cash_out_contact_number']);
-						$sheet->setCellValue('G'.$key, $list['cash_out_tin']);
-						$sheet->setCellValue('H'.$key, $list['cash_out_method_tax']);
-						$sheet->setCellValue('I'.$key, $list['cash_out_method_fee']);
-						$sheet->setCellValue('J'.$key, $list['cash_out_method_service_charge']);
-						$sheet->setCellValue('K'.$key, $list['survey_charge']);
-						$sheet->setCellValue('L'.$key, $list['product_charge']);
-						$sheet->setCellValue('M'.$key, $list['gc_charge']);
-						$sheet->setCellValue('N'.$key, $list['cash_out_savings']);
-						$sheet->setCellValue('O'.$key, $list['cash_out_net_payout_actual']);
-						$sheet->setCellValue('P'.$key, $list['cash_out_net_payout']);
-						$sheet->setCellValue('Q'.$key, $list['cash_out_date']);
-					}
-				});
-			}
-		})->export('xls');
+		
+        $headingsBank = ['Slot Code','Account Name','Account Number','Account Type','Email','Phone Number','TIN','Tax','Method Fee','Service Charge', 'Survey Charge', 'Product Charge','GC Charge','Savings','Amount Due','Net Payout','Date'];
+		$headingsRemit = ['Slot Code','Full Name','Full Address','Other Info','Email','Phone Number','TIN','Tax','Method Fee','Service Charge','Savings','Amount Due','Net Payout','Date'];
 
+        $export = new PayoutScheduleExport($data["methods"], $headingsBank, $headingsRemit);
+        return Excel::download($export, 'Cashout.xlsx');
 	}
 
 	public function top_pairs_csv()
@@ -364,46 +334,35 @@ class AdminExportController extends AdminController
 		$data            = $this->top_pairs();
 		if($data)
 		{
-			$excels['_list'] = $data['_list'];
+            $excels['_list'] = $data['_list'] ?? null;
 			$date_today      = $data['date'];
+            $filename        = 'Top Slot as of '.$date_today;
+            
 			if($excels['_list'])
 			{
-				$excels['data']  =   ['Rank no','Slot ID','Slot no','Slot Owner','Membership','Total Pairs','Date'];
-				Excel::create('Top Slot as of '.$date_today, function($excel) use ($excels)
-				{
-					$excel->sheet('template', function($sheet) use ($excels)
-					{
-						$data = $excels['data'];
-						$sheet->fromArray($data, null, 'A1', false, false);
-						$sheet->freezeFirstRow();
-						$ctr = 0;
-						foreach($excels['_list'] as  $key => $list)
-						{
-							$ctr = $ctr +1;
-							//dd($list['slot_code']['slot_id']);
-							$key = $key+=2;
-							$sheet->setCellValue('A'.$key, $ctr);
-							$sheet->setCellValue('B'.$key, $list['slot_code']['slot_id']);
-							$sheet->setCellValue('C'.$key, $list['slot_code']['slot_no']);
-							$sheet->setCellValue('D'.$key, $list['slot_code']['name']);
-							$sheet->setCellValue('E'.$key, $list['slot_code']['membership_name']);
-							$sheet->setCellValue('F'.$key, $list['total_pairs']);
-							$sheet->setCellValue('G'.$key, $date = Carbon::now()->format('Y-m-d'));
-						}
-					});
-				})->download('xls');
+				$headings = ['Rank no','Slot ID','Slot no','Slot Owner','Membership','Total Pairs','Date'];
+                
+                $ctr = 0;
+                $mapper = function($list) use (&$ctr) {
+                    $ctr++;
+                    return [
+                        $ctr,
+                        $list['slot_code']['slot_id'],
+                        $list['slot_code']['slot_no'],
+                        $list['slot_code']['name'],
+                        $list['slot_code']['membership_name'],
+                        $list['total_pairs'],
+                        Carbon::now()->format('Y-m-d')
+                    ];
+                };
+
+                $export = new DynamicExport($excels['_list'], $headings, $mapper, 'template');
+                return Excel::download($export, $filename.'.xlsx');
 			}
 			else {
-				$excels['data']  =   ['Rank no','Slot ID','Slot no','Slot Owner','Membership','Total Pairs','Date'];
-				Excel::create('Top Pairs Today', function($excel) use ($excels)
-				{
-					$excel->sheet('template', function($sheet) use ($excels)
-					{
-						$data = $excels['data'];
-						$sheet->fromArray($data, null, 'A1', false, false);
-						$sheet->freezeFirstRow();
-					});
-				})->download('xls');
+                $headings = ['Rank no','Slot ID','Slot no','Slot Owner','Membership','Total Pairs','Date'];
+                $export = new DynamicExport([], $headings, function($row){ return []; }, 'template');
+                return Excel::download($export, 'Top Pairs Today.xlsx');
 			}
 		}
 		else
@@ -490,76 +449,43 @@ class AdminExportController extends AdminController
 		}
 		ini_set('memory_limit', '1000M');
 		set_time_limit ( 7200 );
-		$output = Excel::create('Top Recruiters of '.$date_from.' to '.$date_to, function($excel) use($search,$date_from,$date_to) {
-			$excel->sheet('Top Recruiter', function($sheet) use($search,$date_from,$date_to) {
+        
+        $query = Tbl_slot::JoinTopRecruiter()
+                    ->Owner()
+                    ->select('tbl_top_recruiter.slot_id',DB::raw('sum(total_recruits) as total_recruits'),DB::raw('sum(total_leads) as total_leads'));
 
-				$sheet->cell('A1:F1', function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-				$sheet->appendRow(array(
-					'Slot Code','Member Name','Member Contact #','Member Email','Total Recruits','Total Leads'
-				));
-				$key=2;
+        if($search != '' || $search != null)
+        {
+            $query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
+        }
+        if($date_from != '' || $date_from != null)
+        {
+            $query->whereDate("tbl_top_recruiter.date_from",">=",$date_from);
+        }
+        if($date_to != '' || $date_to != null)
+        {
+            $query->whereDate("tbl_top_recruiter.date_to", "<=",$date_to);
+        }
 
-				// dd($search,$date_from,$date_to);
-				$query = Tbl_slot::JoinTopRecruiter()
-							->Owner()
-							->select('tbl_top_recruiter.slot_id',DB::raw('sum(total_recruits) as total_recruits'),DB::raw('sum(total_leads) as total_leads'));
+        $query = $query->groupBy('tbl_top_recruiter.slot_id','total_recruits');
+        $query = $query->orderBy('total_recruits','DESC');
 
-				if($search != '' || $search != null)
-				{
-					$query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
-				}
-				if($date_from != '' || $date_from != null)
-				{
-					$query->whereDate("tbl_top_recruiter.date_from",">=",$date_from);
-				}
-				if($date_to != '' || $date_to != null)
-				{
-					$query->whereDate("tbl_top_recruiter.date_to", "<=",$date_to);
-				}
+        $headings = ['Slot Code','Member Name','Member Contact #','Member Email','Total Recruits','Total Leads'];
 
-				$query = $query->groupBy('tbl_top_recruiter.slot_id','total_recruits');
-				$query = $query->orderBy('total_recruits','DESC');
-				// $total_count = $query->count();
-				$query->chunk(100000, function($lists) use($sheet,&$key) {
+        $mapper = function($list) {
+            $details = Tbl_slot::where('slot_id',$list->slot_id)->Owner()->select('slot_no','name','contact','email')->first();
+            return [
+                $details ? $details->slot_no : '',
+                $details ? $details->name : '',
+                $details ? $details->contact : '',
+                $details ? $details->email : '',
+                $list->total_recruits,
+                $list->total_leads
+            ];
+        };
 
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						// dd($list);
-						$list["details"]   = Tbl_slot::where('slot_id',$list['slot_id'])->Owner()->select('slot_no','name','contact','email')->first();
-						$sheet->setCellValue('A'.$key, $list["details"]['slot_no']);
-						$sheet->setCellValue('B'.$key, $list["details"]['name']);
-						$sheet->setCellValue('C'.$key, $list["details"]['contact']);
-						$sheet->setCellValue('D'.$key, $list["details"]['email']);
-						$sheet->setCellValue('E'.$key, $list['total_recruits']);
-						$sheet->setCellValue('F'.$key, $list['total_leads']);
-						$key++;
-					}
-				});
-				// add footer
-				// $total_counts = $total_count + 5;
-				// $sheet->appendRow([
-				// 	'Export a Total of '.$total_count.' slots'
-				// ]);
-				// $sheet->mergeCells("A$total_counts:F$total_counts");
-				// $sheet->cell("A$total_counts", function($cell) {
-				// 	$cell->setAlignment('center')
-				// 		->setValignment('center')
-				// 		->setFontColor('#666666')
-				// 		->setFontSize(10);
-				// });
-
-
-			});
-		});
-		$output->download('xlsx');
+        $export = new QueryExport($query, $headings, $mapper, 'Top Recruiter');
+        return Excel::download($export, 'Top Recruiters of '.$date_from.' to '.$date_to.'.xlsx');
 	}
 
 	public function cashflow_report_csv()
@@ -569,77 +495,35 @@ class AdminExportController extends AdminController
 
 		$search = null;
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Cashflow as of '.$date_today, function($excel) use($search) {
-			$excel->sheet('Top Recruiter', function($sheet) use($search) {
+        
+        $currency_id = Tbl_currency::where('currency_default',1)->first()->currency_id;
+        $query 		 = Tbl_slot::where("tbl_slot.archive",0)
+                                ->Owner()
+                                ->Wallet($currency_id)
+                                ->select('tbl_slot.slot_id','slot_no','name','contact','email','wallet_amount')
+                                ->orderBy('wallet_amount','Desc');
 
-				$sheet->cell("A1:G1", function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-				});
+        if($search != '' || $search != null)
+        {
+            $query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
+        }
 
-				$sheet->appendRow(array(
-					'Slot Code','Member Name','Member Contact #','Member Email','Total Income Recieves','Total Amount Paid Out','Current Remaining Balance'
-				));
-				$key=2;
+        $headings = ['Slot Code','Member Name','Member Contact #','Member Email','Total Income Recieves','Total Amount Paid Out','Current Remaining Balance'];
+        
+        $mapper = function($list) {
+            return [
+                $list->slot_no,
+                $list->name,
+                $list->contact,
+                $list->email,
+                $list->total_income_receive,
+                $list->amount_paid_out,
+                $list->wallet_amount
+            ];
+        };
 
-				$currency_id = Tbl_currency::where('currency_default',1)->first()->currency_id;
-				$query 		 = Tbl_slot::where("tbl_slot.archive",0)
-										->Owner()
-										->Wallet($currency_id)
-										->select('tbl_slot.slot_id','slot_no','name','contact','email','wallet_amount')
-										->orderBy('wallet_amount','Desc');
-
-				if($search != '' || $search != null)
-				{
-					$query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
-				}
-				$total_count = $query->count();
-
-				$query->chunk(100000, function($lists) use($sheet,&$key) {
-
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						$sheet->setCellValue('A'.$key, $list['slot_no']);
-						$sheet->setCellValue('B'.$key, $list['name']);
-						$sheet->setCellValue('C'.$key, $list['contact']);
-						$sheet->setCellValue('D'.$key, $list['email']);
-						$sheet->setCellValue('E'.$key, $list['total_income_receive']);
-						$sheet->setCellValue('F'.$key, $list['amount_paid_out']);
-						$sheet->setCellValue('G'.$key, $list['wallet_amount']);
-						$key++;
-					}
-				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:G$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
-				$total_countss =  $total_count + 1;
-				$sheet->cell("G2:G{$total_countss}", function($cell) {
-                    // change header color
-                    $cell->setFontColor('#0fb200')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-
-
-			});
-		});
-		$output->download('xlsx');
-
-
+        $export = new QueryExport($query, $headings, $mapper, 'Top Recruiter');
+        return Excel::download($export, 'Cashflow as of '.$date_today.'.xlsx');
 	}
 
 	public function bonus_summary_csv()
@@ -649,77 +533,33 @@ class AdminExportController extends AdminController
 
 		$search = null;
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Bonus summary as of '.$date_today, function($excel) use($search) {
-			$excel->sheet('Top Recruiter', function($sheet) use($search) {
+        
+        $query = Tbl_slot::where("tbl_slot.archive",0)
+                          ->Owner()
+                          ->select('tbl_slot.slot_id','slot_no','name','contact','email');
+        if($search != '' || $search != null)
+        {
+            $query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
+        }
+        
+        $headings = ['Slot Code','Member Name','Member Contact #','Member Email','Direct Referral Income','Indirect Referral Income','Binary Income','Stairstep Bonus','Unilevel Bonus'];
+        
+        $mapper = function($list) {
+            return [
+                $list->slot_no,
+                $list->name,
+                $list->contact,
+                $list->email,
+                $list->direct_income,
+                $list->indirect_income,
+                $list->binary_income,
+                $list->stairstep_income,
+                $list->unilevel_bonus_income
+            ];
+        };
 
-				$sheet->cell("A1:I1", function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-				});
-
-				$sheet->appendRow(array(
-					'Slot Code','Member Name','Member Contact #','Member Email','Direct Referral Income','Indirect Referral Income','Binary Income','Stairstep Bonus','Unilevel Bonus'
-				));
-				$key=2;
-
-				$query = Tbl_slot::where("tbl_slot.archive",0)
-								  ->Owner()
-								  ->select('tbl_slot.slot_id','slot_no','name','contact','email');
-				if($search != '' || $search != null)
-				{
-					$query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%");
-				}
-				// $query    = $query->take(100000);
-				$total_count = $query->count();
-
-				$query->chunk(100000, function($lists) use($sheet,&$key) {
-
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						// if($list['direct_income'] != 0 || $list['indirect_income'] != 0 || $list['binary_income'] != 0 || $list['stairstep_income'] != 0 || $list['unilevel_bonus_income'] != 0 )
-						// {
-							$sheet->setCellValue('A'.$key, $list['slot_no']);
-							$sheet->setCellValue('B'.$key, $list['name']);
-							$sheet->setCellValue('C'.$key, $list['contact']);
-							$sheet->setCellValue('D'.$key, $list['email']);
-							$sheet->setCellValue('E'.$key, $list['direct_income']);
-							$sheet->setCellValue('F'.$key, $list['indirect_income']);
-							$sheet->setCellValue('G'.$key, $list['binary_income']);
-							$sheet->setCellValue('H'.$key, $list['stairstep_income']);
-							$sheet->setCellValue('I'.$key, $list['unilevel_bonus_income']);
-							$key++;
-						// }
-					}
-				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:I$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
-				$total_countss =  $total_count + 1;
-				$sheet->cell("E2:I{$total_countss}", function($cell) {
-                    // change header color
-                    $cell->setFontColor('#0fb200')
-                        ->setAlignment('center')
-						->setValignment('center');
-                });
-
-
-			});
-		});
-		$output->download('xlsx');
+        $export = new QueryExport($query, $headings, $mapper, 'Top Recruiter');
+        return Excel::download($export, 'Bonus summary as of '.$date_today.'.xlsx');
 	}
 
 	public function export_sales_report($ref)
@@ -733,16 +573,9 @@ class AdminExportController extends AdminController
 		}
 		else
 		{
-			$xls['_list'] = $data;
-			Excel::create("AdminSalesReport" ,function($excel) use ($xls)
-			{
-				$excel->sheet("Sales Report", function($sheet) use ($xls)
-				{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.excel.adminSalesReportxls', $xls);
-				});
-
-			})->export('xls');
+            $xls['_list'] = $data;
+            $export = new ViewExport('export.excel.adminSalesReportxls', $xls, 'Sales Report');
+            return Excel::download($export, 'AdminSalesReport.xlsx');
 		}
 	}
 
@@ -758,76 +591,46 @@ class AdminExportController extends AdminController
 		ini_set('memory_limit', '1000M');
 		set_time_limit ( 7200 );
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Eloading Logs as of '.$date_today, function($excel) use($search,$date_from,$date_to) {
-			$excel->sheet('Eloading', function($sheet) use($search,$date_from,$date_to) {
+        
+        $currency_id = Tbl_currency::where('currency_name','Load Wallet')->value('currency_id');
 
-				$sheet->cell('A1:E1', function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-				$sheet->appendRow(array(
-					'Member Name','Slot Code','Member Email','Amount','Date'
-				));
-				$key=2;
+        $query                  = Tbl_wallet_log::where('currency_id',$currency_id)
+                                                    ->leftJoin('tbl_slot','tbl_slot.slot_id','=','tbl_wallet_log.wallet_log_slot_id')
+                                                    ->leftJoin('users','users.id','=','tbl_slot.slot_owner')
+                                                    ->select('name','email','slot_no','wallet_log_amount','wallet_log_date_created')
+                                                    ->orderBy('wallet_log_date_created','ASC');
 
-				$currency_id = Tbl_currency::where('currency_name','Load Wallet')->value('currency_id');
+        if($search != '' || $search != null )
+        {
+            $query = $query->where("users.name", "like", "%". $search . "%")->orwhere("users.email", "like", "%". $search . "%");
+        }
+        if($date_from != '' || $date_from != null )
+        {
+            $query->whereDate('wallet_log_date_created', '>=', $date_from);
+        }
+        if($date_to != '' || $date_to != null )
+        {
+            $query->whereDate('wallet_log_date_created', '<=', $date_to);
+        }
 
-				$query                  = Tbl_wallet_log::where('currency_id',$currency_id)
-															->leftJoin('tbl_slot','tbl_slot.slot_id','=','tbl_wallet_log.wallet_log_slot_id')
-															->leftJoin('users','users.id','=','tbl_slot.slot_owner')
-															->select('name','email','slot_no','wallet_log_amount','wallet_log_date_created')
-															->orderBy('wallet_log_date_created','ASC');
+        $headings = ['Member Name','Slot Code','Member Email','Amount','Date'];
+        
+        $mapper = function($list) {
+            return [
+                $list->name,
+                $list->slot_no,
+                $list->email,
+                $list->wallet_log_amount,
+                $list->wallet_log_date_created
+            ];
+        };
 
-				if($search != '' || $search != null )
-				{
-					$query = $query->where("users.name", "like", "%". $search . "%")->orwhere("users.email", "like", "%". $search . "%");
-				}
-				if($date_from != '' || $date_from != null )
-				{
-					$query->whereDate('wallet_log_date_created', '>=', $date_from);
-				}
-				if($date_to != '' || $date_to != null )
-				{
-					$query->whereDate('wallet_log_date_created', '<=', $date_to);
-				}
-				$total_count = $query->count();
-
-				$query->chunk(15000, function($lists) use($sheet,&$key) {
-
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						$sheet->setCellValue('A'.$key, $list['name']);
-						$sheet->setCellValue('B'.$key, $list['slot_no']);
-						$sheet->setCellValue('C'.$key, $list['email']);
-						$sheet->setCellValue('D'.$key, $list['wallet_log_amount']);
-						$sheet->setCellValue('E'.$key, $list['wallet_log_date_created']);
-						$key++;
-					}
-				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:E$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
-
-
-			});
-		});
-		$output->download('xlsx');
-
+        $export = new QueryExport($query, $headings, $mapper, 'Eloading');
+        return Excel::download($export, 'Eloading Logs as of '.$date_today.'.xlsx');
 	}
+
+
+					// garbage code removed
 
 	public function adjustwallet_report_xlxs()
 	{
@@ -838,78 +641,40 @@ class AdminExportController extends AdminController
 		{
 			$search = null;
 		}
-		ini_set('memory_limit', '1000M');
-		set_time_limit ( 7200 );
+		
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Adjusted Wallet as of '.$date_today, function($excel) use($search,$date_from,$date_to) {
-			$excel->sheet('Adjusted Wallet', function($sheet) use($search,$date_from,$date_to) {
+		
+		$query = Tbl_adjust_wallet_log::Slot()->Owner()->where("slot_status","active");
 
-				$sheet->cell('A1:F1', function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-				$sheet->appendRow(array(
-					'Member Name','Member Email','Slot Code','Currency','Amount','Date'
-				));
-				$key=2;
+		if($search != '' || $search != null)
+		{
+			$query->where("users.name", "like", "%". $search . "%");
+		}
+		if($date_from != '' || $date_from != null)
+		{
+			$query->whereDate('date_created','>=',$date_from);
+		}
+		if($date_to != '' || $date_to != null)
+		{
+			$query->whereDate('date_created','<=',$date_to);
+		}
+		$query->orderBy('date_created','Desc');
 
-				$query = Tbl_adjust_wallet_log::Slot()->Owner()->where("slot_status","active");
+		$headings = ['Member Name','Member Email','Slot Code','Currency','Amount','Date'];
 
-				if($search != '' || $search != null)
-				{
-					$query->where("users.name", "like", "%". $search . "%");
+		$mapper = function($list) {
+			return [
+				$list->name,
+				$list->email,
+				$list->slot_no,
+				$list->adjusted_detail,
+				$list->adjusted_currency . " " . $list->adjusted_amount,
+				$list->date_created
+			];
+		};
 
-					// $query->where("tbl_slot.slot_no", "like", "%". $search . "%")->orWhere("users.name", "like", "%". $search . "%")->orWhere("users.email", "like", "%". $search . "%");
-				}
-				if($date_from != '' || $date_from != null)
-				{
-					$query->whereDate('date_created','>=',$date_from);
-				}
-				if($date_to != '' || $date_to != null)
-				{
-					$query->whereDate('date_created','<=',$date_to);
-				}
-					$query->orderBy('date_created','Desc');
-
-				$total_count = $query->count();
-				// $data        = $query->get();
-				// dd($data);
-				$query->chunk(15000, function($lists) use($sheet,&$key) {
-
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						$sheet->setCellValue('A'.$key, $list['name']);
-						$sheet->setCellValue('B'.$key, $list['email']);
-						$sheet->setCellValue('C'.$key, $list['slot_no']);
-						$sheet->setCellValue('D'.$key, $list['adjusted_detail']);
-						$sheet->setCellValue('E'.$key, $list['adjusted_currency']." ".$list['adjusted_amount']);
-						$sheet->setCellValue('F'.$key, $list['date_created']);
-						$key++;
-					}
-				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:F$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
-
-
-			});
-		});
-		$output->download('xlsx');
-
+		$export = new QueryExport($query, $headings, $mapper, 'Adjusted Wallet');
+		return Excel::download($export, 'Adjusted Wallet as of '.$date_today.'.xlsx');
 	}
 
 	public function code_transfer_report_xlxs()
@@ -921,94 +686,68 @@ class AdminExportController extends AdminController
 		{
 			$search = null;
 		}
-		ini_set('memory_limit', '1000M');
-		set_time_limit ( 7200 );
+		
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Code Transfer Report as of '.$date_today, function($excel) use($search,$date_from,$date_to) {
-			$excel->sheet('Code Transfer Report', function($sheet) use($search,$date_from,$date_to) {
+		
+		if($date_from == null || $date_to == null || $date_from == 'undefined' || $date_to == 'undefined')
+		{
+			$date_from 	= Carbon::now()->format('Y-m-d');
+			$date_to   	= Carbon::now()->format('Y-m-d');
+		}
 
-				$sheet->cell('A1:F1', function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-				$sheet->appendRow(array(
-					'Code','Pin','Origin Slot','From Slot','To Slot','Date Transfer'
-				));
-				$key=2;
-				if($date_from == null || $date_to == null || $date_from == 'undefined' || $date_to == 'undefined')
-				{
-					$date_from 	= Carbon::now()->format('Y-m-d');
-					$date_to   	= Carbon::now()->format('Y-m-d');
-				}
+		$query = Tbl_code_transfer_logs::leftJoin('tbl_codes','tbl_codes.code_id','=','tbl_code_transfer_logs.code_id')
+										->select('tbl_code_transfer_logs.code_id','from_slot','to_slot','original_slot','date_transfer','code_activation','code_pin');
 
-				$query = Tbl_code_transfer_logs::leftJoin('tbl_codes','tbl_codes.code_id','=','tbl_code_transfer_logs.code_id')
-												->select('tbl_code_transfer_logs.code_id','from_slot','to_slot','original_slot','date_transfer','code_activation','code_pin');
-
-				if($search != '' || $search != null)
-				{
-					$search2 = Tbl_slot::where("slot_no",$search)->first()->slot_id;
-					if($search2 != '' || $search2 != null)
-					{
-						$query->where("from_slot", "like", "%". $search2 . "%")->where("to_slot", "like", "%". $search2 . "%")->where("original_slot", "like", "%". $search2 . "%");
-					}
-					else
-					{
-						$query->where("tbl_codes.code_activation", "like", "%". $search . "%");
-					}
-				}
-				if($date_from != '' || $date_from != null)
-				{
-					$query->whereDate('date_transfer','>=',$date_from);
-				}
-				if($date_to != '' || $date_to != null)
-				{
-					$query->whereDate('date_transfer','<=',$date_to);
-				}
-				$query->orderBy('date_transfer','Desc');
-				$total_count = $query->count();
-				// $data        = $query->get();
-				// dd($data);
-				$query->chunk(15000, function($lists) use($sheet,&$key) {
-
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						$list['from_slot_code']       = Tbl_slot::where("slot_id",$list->from_slot)->select("slot_no")->first();
-						$list['to_slot_code']         = Tbl_slot::where("slot_id",$list->to_slot)->select("slot_no")->first();
-						$list['original_slot_code']   = Tbl_slot::where("slot_id",$list->original_slot)->select("slot_no")->first();
-						// dd($list);
-						$sheet->setCellValue('A'.$key, $list['code_activation']);
-						$sheet->setCellValue('B'.$key, $list['code_pin']);
-						$sheet->setCellValue('C'.$key, $list['original_slot_code']['slot_no']);
-						$sheet->setCellValue('D'.$key, $list['from_slot_code']['slot_no']);
-						$sheet->setCellValue('E'.$key, $list['to_slot_code']['slot_no']);
-						$sheet->setCellValue('F'.$key, $list['date_transfer']);
-						$key++;
-					}
+		if($search != '' || $search != null)
+		{
+			$search_slot = Tbl_slot::where("slot_no",$search)->first();
+			$search2 = $search_slot ? $search_slot->slot_id : null;
+			
+			if($search2)
+			{
+				$query->where(function($q) use ($search2) {
+					$q->where("from_slot", "like", "%". $search2 . "%")
+					  ->orWhere("to_slot", "like", "%". $search2 . "%")
+					  ->orWhere("original_slot", "like", "%". $search2 . "%");
 				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:F$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
+			}
+			else
+			{
+				$query->where("tbl_codes.code_activation", "like", "%". $search . "%");
+			}
+		}
+		if($date_from != '' || $date_from != null)
+		{
+			$query->whereDate('date_transfer','>=',$date_from);
+		}
+		if($date_to != '' || $date_to != null)
+		{
+			$query->whereDate('date_transfer','<=',$date_to);
+		}
+		$query->orderBy('date_transfer','Desc');
 
+		$headings = ['Code','Pin','Origin Slot','From Slot','To Slot','Date Transfer'];
+		
+		$mapper = function($list) {
+            $from = Tbl_slot::where("slot_id", $list->from_slot)->value("slot_no");
+            $to = Tbl_slot::where("slot_id", $list->to_slot)->value("slot_no");
+            $orig = Tbl_slot::where("slot_id", $list->original_slot)->value("slot_no");
+			
+			return [
+				$list->code_activation,
+				$list->code_pin,
+				$orig,
+				$from,
+				$to,
+				$list->date_transfer
+			];
+		};
 
-			});
-		});
-		$output->download('xlsx');
-
+		$export = new QueryExport($query, $headings, $mapper, 'Code Transfer Report');
+		return Excel::download($export, 'Code Transfer Report as of '.$date_today.'.xlsx');
 	}
+
+
 	public function members_detail_report_xlxs()
 	{
 		$search      	= Request::input('search');
@@ -1026,113 +765,61 @@ class AdminExportController extends AdminController
 		{
 			$date_to = null;
 		}
-		ini_set('memory_limit', '1000M');
-		set_time_limit ( 7200 );
+		
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Members as of '.$date_today, function($excel) use($search,$date_from,$date_to) {
-			$excel->sheet('Members', function($sheet) use($search,$date_from,$date_to) {
+		
+		$query = Users::leftJoin("tbl_country","tbl_country.country_id","=","users.country_id")
+		              ->join('tbl_slot', 'tbl_slot.slot_owner', '=', 'users.id')
+		              ->leftJoin('users as sponsor', 'sponsor.id', '=', 'tbl_slot.slot_sponsor') // Assuming slot_sponsor is User ID based on legacy line 904 logic, OR logic needs review.
+					  // Legacy Logic Analysis:
+					  // Line 904: leftJoin("users","users.id","=","tbl_slot.slot_sponsor") -> access via value2 (slot) -> slot_sponsor
+					  // Line 910: Tbl_slot::where("slot_id",$value2["slot_sponsor"])->Owner()->first()
+					  // This implied slot_sponsor IS A SLOT ID.
+					  // So joining Users on slot_sponsor is likely WRONG in legacy if it was intended to get Sponsor Name directly from a User ID.
+					  // But if slot_sponsor is a Slot ID, we should join Tbl_slot as sponsor_slot.
+					  // Let's stick to safe 'map' logic for sponsor details to avoid invalid joins if schema is ambiguous.
+					  ->select('users.*', 'tbl_country.country_name', 'tbl_slot.slot_id as current_slot_id', 'tbl_slot.slot_no', 'tbl_slot.slot_sponsor');
 
-				$sheet->cell('A1:K1', function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-                });
-				$sheet->appendRow(array(
-					'First Name','Middle Name','Last Name','Address','Email Address','Contact No.','Tin','Slot Code','Sponsor Code','Sponsor Name','Country'
-				));
-				$key=2;
-				$query = Users::leftJoin("tbl_country","tbl_country.country_id","=","users.country_id");
+		if($search != '' || $search != null)
+		{
+			$query->where("users.name", "like", "%". $search . "%")->orWhere("users.email", "like", "%". $search . "%");
+		}
+		if($date_from != '' || $date_from != null)
+		{
+			$query->whereDate('users.created_at','>=',$date_from);
+		}
+		if($date_to != '' || $date_to != null)
+		{
+			$query->whereDate('users.created_at','<=',$date_to);
+		}
 
-				if($search != '' || $search != null)
-				{
-					$query->where("name", "like", "%". $search . "%")->orWhere("users.email", "like", "%". $search . "%");
-				}
-				if($date_from != '' || $date_from != null)
-				{
-					$query->whereDate('created_at','>=',$date_from);
-				}
-				if($date_to != '' || $date_to != null)
-				{
-					$query->whereDate('created_at','<=',$date_to);
-				}
-				$total_count = $query->count();
-				
-				$query->chunk(15000, function($lists) use($sheet,&$key) {
+		$headings = ['First Name','Middle Name','Last Name','Address','Email Address','Contact No.','Tin','Slot Code','Sponsor Code','Sponsor Name','Country'];
+		
+		$mapper = function($list) {
+            $address = Tbl_address::where('user_id',$list->id)->where("archived",0)->Address()->where("is_default",1)->first();
+			$address_str = $address ? ($address->address_info . " " . $address->brgyDesc . " " . $address->citymunDesc . " " . $address->provDesc) : "";
+			
+			$sponsor_slot = Tbl_slot::where("slot_id", $list->slot_sponsor)->first();
+			$sponsor_code = $sponsor_slot ? $sponsor_slot->slot_no : null;
+			$sponsor_name = ($sponsor_slot && $sponsor_slot->owner) ? $sponsor_slot->owner->name : null;
 
-					// $sheet->fromArray($lists);
-					foreach ($lists as $list)
-					{
-						// dd($list);
-						$address_list = Tbl_address::where('user_id',$list["id"])->where("archived",0)->Address()->where("is_default",1)->first();
-						$address_info	=	$address_list["address_info"] ? $address_list["address_info"] : null ;
-						$address_brgy	=	$address_list["brgyDesc"] ? $address_list["brgyDesc"] : null ;
-						$address_city	=	$address_list["citymunDesc"] ? $address_list["citymunDesc"] : null ;
-						$address_prov	=	$address_list["provDesc"] ? $address_list["provDesc"] : null ;
-						$slot_owners = Tbl_slot::where('slot_owner',$list["id"])
-												->leftJoin("users","users.id","=","tbl_slot.slot_sponsor")
-												->select("slot_no","slot_sponsor")	
-												->get();
-						$ctr = 0;
-						foreach ($slot_owners as $key2 => $value2) 
-						{
-							$slot_owners[$key2]->slot_sponsor_name = Tbl_slot::where("slot_id",$value2["slot_sponsor"])->Owner()->first() ? Tbl_slot::where("slot_id",$value2["slot_sponsor"])->Owner()->first()->name : null;
-							$slot_owners[$key2]->slot_sponsor_code = Tbl_slot::where("slot_id",$value2["slot_sponsor"])->Owner()->first() ? Tbl_slot::where("slot_id",$value2["slot_sponsor"])->Owner()->first()->slot_no : null;
-							$ctr++;
-						}
-						// $sheet->setCellValue('A'.$key, $list['first_name'] ? $list['first_name'] : null );
-						// $sheet->setCellValue('B'.$key, $list['middle_name'] ? $list['middle_name'] : null );
-						// $sheet->setCellValue('C'.$key, $list['last_name'] ? $list['last_name'] : null );
-						// $sheet->setCellValue('D'.$key, $address_info." ".$address_brgy." ".$address_city." ".$address_prov);
-						// $sheet->setCellValue('E'.$key, $list['email']);
-						// $sheet->setCellValue('F'.$key, $list['contact']);
-						// $sheet->setCellValue('G'.$key, $list['tin']);
-						// $key_last = $key;
-						foreach ($slot_owners as $value) 
-						{
-							$sheet->setCellValue('A'.$key, $list['first_name'] ? $list['first_name'] : null );
-							$sheet->setCellValue('B'.$key, $list['middle_name'] ? $list['middle_name'] : null );
-							$sheet->setCellValue('C'.$key, $list['last_name'] ? $list['last_name'] : null );
-							$sheet->setCellValue('D'.$key, $address_info." ".$address_brgy." ".$address_city." ".$address_prov);
-							$sheet->setCellValue('E'.$key, $list['email']);
-							$sheet->setCellValue('F'.$key, $list['contact']);
-							$sheet->setCellValue('G'.$key, $list['tin']);
-							$sheet->setCellValue('H'.$key, $value['slot_no']);
-							$sheet->setCellValue('I'.$key, $value['slot_sponsor_code']);
-							$sheet->setCellValue('J'.$key, $value['slot_sponsor_name']);
-							$sheet->setCellValue('K'.$key, $list['country_name']);
-							$key++;
-							// if($ctr > 1)
-							// {
-							// 	$key++;
-							// }
-						}
-						// $sheet->setCellValue('K'.$key_last, $list['country_name']);
-						// if($ctr < 2)
-						// {
-						// 	$key++;
-						// }
-					}
-				});
-				// add footer
-				// $total_counts = $total_count + 1;
-				// $sheet->appendRow([
-				// 	'Export a Total of '.$total_count.' members'
-				// ]);
-				// $sheet->mergeCells("A$total_counts:I$total_counts");
-				// $sheet->cell("A$total_counts", function($cell) {
-				// 	$cell->setAlignment('center')
-				// 		->setValignment('center')
-				// 		->setFontColor('#666666')
-				// 		->setFontSize(10);
-				// });
+			return [
+				$list->first_name,
+				$list->middle_name,
+				$list->last_name,
+				$address_str,
+				$list->email,
+				$list->contact,
+				$list->tin,
+				$list->slot_no,
+				$sponsor_code,
+				$sponsor_name,
+				$list->country_name
+			];
+		};
 
-
-			});
-		});
-		$output->download('xlsx');
+		$export = new QueryExport($query, $headings, $mapper, 'Members');
+		return Excel::download($export, 'Members as of '.$date_today.'.xlsx');
 	}
 
 	public function slot_network_item_breakdown()
@@ -1152,64 +839,12 @@ class AdminExportController extends AdminController
 		else 
 		{	
 			$excels['data']  =   ['Level','Slot Code','Dynamic Level','PV'];
-
 		}
-        Excel::create('Unilevel Level Breakdown From: '.$start." To: ".$end, function($excel) use ($excels,$type)
-        {
-            $excel->sheet('template', function($sheet) use ($excels,$type)
-            {
-                $data = $excels['data'];
-                $sheet->fromArray($data, null, 'A1', false, false);
-				$sheet->freezeFirstRow();
-				$ctr = 2;
-				if($type == 'normal')
-				{
-					foreach($excels['_list']['log'] as  $key => $list)
-					{
-						$sheet->setCellValue('A'.$ctr, $list['level_name']);
-						$sheet->setCellValue('B'.$ctr, $list['number_of_slots']);
-						$sheet->setCellValue('C'.$ctr, $list['last_slot_creation']);
-						$sheet->setCellValue('D'.$ctr, $list['earnings']);
-						$ctr++;
-						foreach($excels['_list']['log'][$key]['items'] as  $key2 => $list2)
-						{
-							$sheet->setCellValue('B'.$ctr, "Item Name : ".$list2['item_desc']['item_sku']);
-							$sheet->setCellValue('C'.$ctr, "Total Purchase: ".$list2['total']);
-							$sheet->setCellValue('D'.$ctr, "Item PV : ".$list2['item_desc']['item_pv']);
-							$sheet->setCellValue('E'.$ctr, "Sum of Points: ".$list2['sum_points']);
-							$ctr++;
-						}
-					}
-				}
-				else 
-				{
-					$ctr = 2;
-					foreach($excels['_list']['log'] as  $key => $list)
-					{
-						// dd($excels['_list']['log']);/
-						if($list['level_name'] != 'Personal Purchase')
-						{
-							$sheet->setCellValue('A'.$ctr, $list['level_name']);
-							foreach ($list["slots"] as $key => $value) 
-							{
-								$sheet->setCellValue('B'.$ctr, $value['slot_no']);
-								$sheet->setCellValue('C'.$ctr, $value['dynamic_level']);
-								$sheet->setCellValue('D'.$ctr, $value['earned_points']);
-								$ctr++;
-							}
-							if(count($list["slots"]) == 0)
-							{
-								$ctr++;
-							}
-							// add footer
-							$sheet->setCellValue('D'.$ctr, "Total Points"." :  ".$list['total_points']);
-							$ctr++;
-						}
-						
-					}
-				}
-            });
-        })->download('xls');
+		
+		$excels['type'] = $type; // Pass type to view
+
+        $export = new ViewExport('export.excel.slot_network_item_breakdown', $excels, 'template');
+        return Excel::download($export, 'Unilevel Level Breakdown From: '.$start." To: ".$end.'.xlsx');
 	}
 	public function slot_network_item_breakdown_data($slot_id)
 	{
@@ -1453,15 +1088,9 @@ class AdminExportController extends AdminController
 			$array['_list'][$key]->receipt = DB::table('tbl_receipt')->where('receipt_order_id', $value->order_id)->first();
 		}
 		
-		Excel::create("ORDER LIST - " . strtoupper($data['status']), function($excel) use ($array)
-		{
-			$excel->sheet("slot_payout_history", function($sheet) use ($array)
-			{
-				$sheet->setOrientation('landscape');
-				$sheet->loadView('export.excel.adminOrderList_xls', $array);
-			});
-
-		})->export('xls');
+		$filename = "ORDER LIST - " . strtoupper($data['status']);
+		$export = new ViewExport('export.excel.adminOrderList_xls', $array, 'slot_payout_history');
+		return Excel::download($export, $filename . '.xlsx');
 	}
 
 	public function export_selected_orders_pdf()
@@ -1509,14 +1138,9 @@ class AdminExportController extends AdminController
 		$prime['level'] = Request::input('level');
 		$data["_slots"] = Slot::get_slot_network($prime);
 		$data["_type"] =$prime['type'];
-		Excel::create("slot_network_list", function($excel) use ($data)
-		{
-			$excel->sheet("slot_network_list", function($sheet) use ($data)
-			{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.csv.slot_network_list_csv', $data);
-			});
-		})->export('csv');
+
+		$export = new ViewExport('export.csv.slot_network_list_csv', $data, 'slot_network_list');
+		return Excel::download($export, 'slot_network_list.csv');
 	}
 	public function slot_network_list_pdf()
 	{
@@ -1531,82 +1155,59 @@ class AdminExportController extends AdminController
 	}
 	public function unilevel_dynamic_report_xlxs()
 	{
-		// dd(Request::input());
 		$search      = Request::input('search');
-		if($search == 'undefined')
-		{
-			$search = null;
-		}
-		if(Request::input('date_month') == null || Request::input('date_month') == 'undefined' || Request::input('date_month') == '')
+		$date_month  = Request::input('date_month');
+		
+		if($date_month == null || $date_month == 'undefined' || $date_month == '')
 		{
 				$start	 	= Carbon::now()->startofMonth();
 				$end 			= Carbon::now()->endofMonth();
 		}
 		else
 		{
-				$start	 	= Carbon::parse(Request::input('date_month'))->startofMonth();
-				$end 			= Carbon::parse(Request::input('date_month'))->endofMonth();
+				$start	 	= Carbon::parse($date_month)->startofMonth();
+				$end 			= Carbon::parse($date_month)->endofMonth();
 		}
 
+		$query = Tbl_dynamic_compression_record::query()
+			->leftJoin("tbl_slot","tbl_slot.slot_id","=","tbl_dynamic_compression_record.slot_id")
+			->leftJoin("users","users.id","=","tbl_slot.slot_owner");
 
-
-		$excels['data']  =   ['Slot Code','Customer Name','Contact','Email','Amount Earned for the Period'];
-		Excel::create('Unilevel Dynamic Report From: '.$start." To: ".$end, function($excel) use ($excels,$start,$end,$search)
+		if($search != '' && $search != null && $search != 'undefined')
 		{
-			$excel->sheet('template', function($sheet) use ($excels,$start,$end,$search)
-			{
-				$data = $excels['data'];
-				$sheet->fromArray($data, null, 'A1', false, false);
-				$sheet->freezeFirstRow();
-				$ctr = 1;
-
-				$query =	Tbl_dynamic_compression_record::groupBy('tbl_dynamic_compression_record.slot_id')
-																									->leftJoin("tbl_slot","tbl_slot.slot_id","=","tbl_dynamic_compression_record.slot_id")
-																									->leftJoin("users","users.id","=","tbl_slot.slot_owner");
-				if($search != '' || $search != null)
-				{
-					$query->where("users.name", "like", "%". $search . "%")->orWhere("users.email", "like", "%". $search . "%")->orWhere("tbl_slot.slot_no", "like", "%". $search . "%");
-				}
-				if($start != '' || $start != null)
-				{
-					$query->whereDate('tbl_dynamic_compression_record.date_created','>=',$start);
-				}
-				if($end != '' || $end != null)
-				{
-					$query->whereDate('tbl_dynamic_compression_record.date_created','<=',$end);
-				}
-				$query->selectRaw('tbl_dynamic_compression_record.slot_id, sum(earned_points) as sum');
-				$_list   =  $query->get();
-				foreach($_list as $key => $list)
-				{
-					$ctr++;
-					// dd($list);
-					$list["details"] = Tbl_slot::where("slot_id",$list["slot_id"])->Owner()->select("slot_no","email","name","contact","first_name","last_name","middle_name")->first();
-					// dd($list);
-					$sheet->setCellValue('A'.$ctr, $list['details']['slot_no']);
-					$sheet->setCellValue('B'.$ctr, $list['details']['first_name'].",".$list['details']['last_name']." ".$list['details']['middle_name']);
-					$sheet->setCellValue('C'.$ctr, $list['details']['email']);
-					$sheet->setCellValue('D'.$ctr, $list['details']['contact']);
-					$sheet->setCellValue('E'.$ctr, $list['sum']);
-					
-				}
-
-
-				// $query->chunk(15000, function($raw_data) use($sheet,&$ctr) {
-				// 	foreach($raw_data as $key => $list)
-				// 	{
-				// 		// dd($list);
-				// 		$lists[$key]->details = Tbl_slot::where("slot_id",$list->slot_id)->Owner()->select("slot_no","email","name","contact","first_name","last_name","middle_name")->first();
-				// 		$ctr++;
-				// 		$sheet->setCellValue('A'.$ctr, $list['details']['slot_no']);
-				// 		$sheet->setCellValue('B'.$ctr, $list['details']['first_name'].",".$list['details']['last_name']." ".$list['details']['middle_name']);
-				// 		$sheet->setCellValue('C'.$ctr, $list['details']['email']);
-				// 		$sheet->setCellValue('D'.$ctr, $list['details']['contact']);
-				// 		$sheet->setCellValue('E'.$ctr, $list['sum']);
-				// 	}
-				// });
+			$query->where(function($q) use ($search) {
+				$q->where("users.name", "like", "%". $search . "%")
+				  ->orWhere("users.email", "like", "%". $search . "%")
+				  ->orWhere("tbl_slot.slot_no", "like", "%". $search . "%");
 			});
-		})->download('xls');
+		}
+		
+		if($start != '' && $start != null)
+		{
+			$query->whereDate('tbl_dynamic_compression_record.date_created','>=',$start);
+		}
+		if($end != '' && $end != null)
+		{
+			$query->whereDate('tbl_dynamic_compression_record.date_created','<=',$end);
+		}
+		
+		$query->selectRaw('tbl_dynamic_compression_record.slot_id, sum(earned_points) as sum, tbl_slot.slot_no, users.first_name, users.last_name, users.middle_name, users.email, users.contact')
+		      ->groupBy('tbl_dynamic_compression_record.slot_id', 'tbl_slot.slot_no', 'users.first_name', 'users.last_name', 'users.middle_name', 'users.email', 'users.contact');
+
+		$headings = ['Slot Code','Customer Name','Contact','Email','Amount Earned for the Period'];
+		
+		$mapper = function($list) {
+			return [
+				$list->slot_no,
+				$list->first_name . "," . $list->last_name . " " . $list->middle_name,
+				$list->email,
+				$list->contact,
+				$list->sum
+			];
+		};
+
+		$export = new QueryExport($query, $headings, $mapper, 'template');
+		return Excel::download($export, 'Unilevel Dynamic Report From: '.$start." To: ".$end.'.xlsx');
 	}
 
 	public function export_payout_xls()
@@ -1638,14 +1239,9 @@ class AdminExportController extends AdminController
 			} 
 		} 
 		$data['_list'] = $result;
-		Excel::create("export_payout", function($excel) use ($data)
-		{
-			$excel->sheet("export_payout", function($sheet) use ($data)
-			{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.excel.exportPayout_xls', $data);
-			});
-		})->export('xls');
+		
+		$export = new ViewExport('export.excel.exportPayout_xls', $data, 'export_payout');
+		return Excel::download($export, 'export_payout.xlsx');
 	}
 
 	public function export_admin_inventory_xls()
@@ -1653,15 +1249,9 @@ class AdminExportController extends AdminController
 		$data['_list'] = Item::get_inventory(Request::input());
 		$branch_details = Tbl_branch::where('branch_id', $data['_list'][0]->inventory_branch_id)->first();
 		$data['branch']	= $branch_details;
-		Excel::create("Inventory", function($excel) use ($data)
-		{
-			$excel->sheet("Inventory", function($sheet) use ($data)
-			{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.excel.exportAdminInventory_xls', $data);
-			});
-		})->export('xls');
 
+		$export = new ViewExport('export.excel.exportAdminInventory_xls', $data, 'Inventory');
+		return Excel::download($export, 'Inventory.xlsx');
 	}
 
 	public function export_admin_inventory_pdf()
@@ -1676,15 +1266,9 @@ class AdminExportController extends AdminController
 	public function export_admin_item_inventory_xls()
 	{
 		$data['_list'] = Item::get_item_inventory(Request::input());
-		Excel::create("Inventory", function($excel) use ($data)
-		{
-			$excel->sheet("Inventory", function($sheet) use ($data)
-			{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.excel.exportAdminInventory_xls', $data);
-			});
-		})->export('xls');
-
+		
+		$export = new ViewExport('export.excel.exportAdminInventory_xls', $data, 'Inventory');
+		return Excel::download($export, 'Inventory.xlsx');
 	}
 
 	public function export_admin_item_inventory_pdf()
@@ -1763,27 +1347,9 @@ class AdminExportController extends AdminController
 			}
 		}
 
-		Excel::create("Item_Purchased_Report_" . date('m_d_Y'), function ($excel) use ($top_sellers) {
-			$excel->sheet("Top Sellers", function ($sheet) use ($top_sellers) {
-				$sheet->setOrientation('landscape');
-				$sheet->loadView('export.excel.adminTopSellerReport_xls', ['top_sellers' => $top_sellers]);
-		
-				// Apply styling for vertical alignment and auto column width
-				$sheet->cells('A1:J1', function ($cells) {
-					$cells->setAlignment('center'); // Align text center (horizontal)
-					$cells->setValignment('middle'); // Align text middle (vertical)
-				});
-		
-				// Auto-fit column width
-				foreach (range('A', 'J') as $column) {
-					$sheet->getColumnDimension($column)->setAutoSize(true);
-				}
-		
-				// Set default row height (Auto-sizing rows is unreliable in Laravel Excel)
-				$sheet->getDefaultRowDimension()->setRowHeight(20);
-			});
-		})->export('xls');		
-		
+		$filename = "Item_Purchased_Report_" . date('m_d_Y');
+		$export = new ViewExport('export.excel.adminTopSellerReport_xls', ['top_sellers' => $top_sellers], 'Top Sellers');
+		return Excel::download($export, $filename . '.xlsx');
 	}
 
 	public function promo_report_xls()
@@ -1791,148 +1357,34 @@ class AdminExportController extends AdminController
 		$date   = Request::input("date_month") ? Request::input("date_month") : Carbon::now();
 		$level   = Request::input("level") ? Request::input("level") : 1;
 		$item_id = Request::input("item") ? Request::input("item") : 0;
-		$start = Carbon::parse($date)->startofMonth();
-		$end = Carbon::parse($date)->endofMonth();
+		// $start = Carbon::parse($date)->startofMonth();
+		// $end = Carbon::parse($date)->endofMonth();
 
-		$output = Excel::create('Promo as of '.$date, function($excel) use($start,$end,$level,$item_id) {
-			$excel->sheet('Promo', function($sheet) use($start,$end,$level,$item_id) {
-
-				$sheet->cell('A1:G1', function($cell) {
-					// change header color
-					$cell->setBackground('#0fb200')
-						->setFontColor('#ffffff')
-						->setFontWeight('bold')
-						->setAlignment('center')
-						->setValignment('center');
-				});
-				$sheet->appendRow(array(
-					'Slot Code','Name','Email','Contact','Level','Item','Qty No.'
-				));
-				$key=2;
-				$query  	 = Tbl_slot::where("membership_inactive",0)
-										->where("slot_status","active")
-										->Owner()
-										->select("slot_id","slot_no","name","email","contact");
-										
-				$total_count = $query->count();
-				
-				$query->chunk(15000, function($lists) use($sheet,&$key,$start,$end,$level,$item_id) 
-				{
-					// dd($lists);
-					foreach ($lists as $list)
-					{
-						
-						$list["level"]        = $level;
-						$list["slot_records"] =  Tbl_dynamic_compression_record::where("slot_id",$list["slot_id"])
-													->where("dynamic_level",$level)
-													->whereDate("start_date",">=",$start)
-													->whereDate("end_date","<=",$end)
-													->select("cause_slot_id")
-													->get();
-						$list["item_counts"] = 0;
-						$list["item"]  = "---";
-						foreach ($list["slot_records"] as $key2 => $slot_records) 
-						{
-							$count = Tbl_unilevel_points::where("unilevel_points_slot_id",$slot_records["cause_slot_id"])
-									->where("unilevel_points_date_created",">=",$start)
-									->where("unilevel_points_date_created","<=",$end);
-									if($item_id == 0)
-									{
-										$list["item"]  = "All";
-										$count = $count->count();
-									}
-									else
-									{
-										$list["item"]  = Tbl_item::where("tbl_item.archived", 0)->where("item_id",$item_id)->select("item_sku")->first()->item_sku;
-										$count = $count->where("unilevel_item_id",$item_id)->count();
-									}
-							$list["item_counts"]  = $list["item_counts"] + $count;
-						}
-						
-						$sheet->setCellValue('A'.$key, $list['slot_no']);
-						$sheet->setCellValue('B'.$key, $list['name']);
-						$sheet->setCellValue('C'.$key, $list['email']);
-						$sheet->setCellValue('D'.$key, $list['contact']);
-						$sheet->setCellValue('E'.$key, $list['level']);
-						$sheet->setCellValue('F'.$key, $list['item']);
-						$sheet->setCellValue('G'.$key, $list['item_counts']);
-						$key++;
-					}
-				});
-				// add footer
-				$total_counts = $total_count + 2;
-				$sheet->appendRow([
-					'Export a Total of '.$total_count.' slots'
-				]);
-				$sheet->mergeCells("A$total_counts:G$total_counts");
-				$sheet->cell("A$total_counts", function($cell) {
-					$cell->setAlignment('center')
-						->setValignment('center')
-						->setFontColor('#666666')
-						->setFontSize(10);
-				});
-
-
-			});
-		});
-		$output->download('xlsx');
+        $export = new PromoReportExport($date, $level, $item_id);
+		return Excel::download($export, 'Promo as of '.$date.'.xlsx');
 	}
 	public function survey_csv()
 	{
 		ini_set('memory_limit', '1000M');
 		set_time_limit ( 7200 );
 
-		$search = null;
 		$date_today =  Carbon::Now()->format('Y/d/m');
-		$output = Excel::create('Survey summary as of '.$date_today, function($excel) use($search) {
-			$excel->sheet('Top Recruiter', function($sheet) use($search) {
-
-				$sheet->cell("A1:I1", function($cell) {
-                    // change header color
-                    $cell->setBackground('#0fb200')
-                        ->setFontColor('#ffffff')
-                        ->setFontWeight('bold')
-                        ->setAlignment('center')
-                        ->setValignment('center');
-				});
-				
-
-				$questions = DB::table('tbl_survey_question')->where('survey_archived', 0)->get();
-				$key = 1;
-				$sheet->appendRow(array(
-					'Question','Choices','Total Answered','Percentage Answered'
-				));
-				$key = 2;
-				foreach ($questions  as $key1 => $question) {
-							
-						$total_count = 0;
-						$questions[$key1]->choices	= DB::table('tbl_survey_choices')->where('survey_question_id',$question->id)->where('survey_choices_status',0)->get();
-						$choice123 = null;	
-						foreach ($questions[$key1]->choices as $key2 => $choice) {
-							$i = DB::table('tbl_survey_answer')->where('survey_choices_id',$choice->id)->count();
-							$choice	->count = $i;
-							$total_count = $total_count + $i;
-						}
-						$questions[$key1]->total_count	= $total_count;	
-						
-						$sheet->setCellValue('A'.($key),$question->survey_question);
-
-						foreach ($questions[$key1]->choices as $key2 => $choice) {
-							$i = DB::table('tbl_survey_answer')->where('survey_choices_id',$choice->id)->count();
-							$choice->count = $i;
-							$sheet->setCellValue('B'.($key),$choice->survey_choices_details);
-							$sheet->setCellValue('C'.($key),$choice->count);
-							$sheet->setCellValue('D'.($key),Self::get_percentage($choice->count,$questions[$key1]->total_count).'%');
-							$sheet->getStyle('D'.($key))->getAlignment()->applyFromArray(
-								array('horizontal' => 'right')
-							);
-							$key++;
-						}
+		$questions = DB::table('tbl_survey_question')->where('survey_archived', 0)->get();
+		
+		foreach ($questions  as $key1 => $question) {
+					
+				$total_count = 0;
+				$questions[$key1]->choices	= DB::table('tbl_survey_choices')->where('survey_question_id',$question->id)->where('survey_choices_status',0)->get();
+				foreach ($questions[$key1]->choices as $key2 => $choice) {
+					$i = DB::table('tbl_survey_answer')->where('survey_choices_id',$choice->id)->count();
+					$choice->count = $i;
+					$total_count = $total_count + $i;
 				}
-
-			});
-		});
-		$output->download('xlsx');
+				$questions[$key1]->total_count	= $total_count;	
+		}
+		
+		$export = new ViewExport('export.excel.survey_report', ['questions' => $questions], 'Top Recruiter');
+		return Excel::download($export, 'Survey summary as of '.$date_today.'.xlsx');
 	}
 	public static function get_percentage($count1,$count2){
 		$a = 0;
@@ -1945,14 +1397,8 @@ class AdminExportController extends AdminController
 	{
 		$data['_list'] = AdminOrderController::get_dragonpay_orders(Request::input(),1);
 
-		Excel::create("Dragonpay Orders", function($excel) use ($data)
-		{
-			$excel->sheet("Dragonpay Orders", function($sheet) use ($data)
-			{
-					$sheet->setOrientation('landscape');
-					$sheet->loadView('export.excel.Dragonpay.AdminDragonpayOrders_xls', $data);
-			});
-		})->export('xls');
+		$export = new ViewExport('export.excel.Dragonpay.AdminDragonpayOrders_xls', $data, 'Dragonpay Orders');
+		return Excel::download($export, 'DragonpayOrders.xlsx');
 	}
 	public function export_dragonpay_export_pdf()
 	{
@@ -1975,46 +1421,10 @@ class AdminExportController extends AdminController
 		{
 			$data["methods"][$key]["transactions"] = Tbl_cash_out_list::where('schedule_id',$schedule->schedule_id)->where("tbl_cash_out_list.cash_out_method_id", $value->cash_out_method_id)->get();
 		}
-		$data['column']  =   ['Proc','Acct','Type','Name','Amount','Date','TxnId','Email','Description','Slot Code'];
-		// dd($data);
-
-		Excel::create('Payout', function($excel) use ($data)
-		{
-			$methods = $data['methods'];
-			foreach($methods as $keys => $method)
-			{
-				$data['method'] = $method;
-				$excel->sheet($method->cash_out_method_name, function($sheet) use($data)
-				{
-					$method = $data['method'];
-					$column = $data['column'];
-					$sheet->fromArray($column, null, 'A1', false, false);
-					$sheet->freezeFirstRow();
-					foreach($method->transactions as  $key => $list)
-					{
-						$key = $key+=2;
-						$sheet->setCellValue('A'.$key, $method['cash_out_proc']);
-						$sheet->setCellValue('B'.$key, $list['cash_out_secondary_info']);
-						$sheet->setCellValue('C'.$key, $list['cash_out_optional_info']);
-						$sheet->setCellValue('D'.$key, $list['cash_out_primary_info']);
-						$sheet->setCellValue('E'.$key, $list['cash_out_net_payout']);
-						$sheet->setCellValue('F'.$key, $list['cash_out_date']);
-						$sheet->setCellValue('G'.$key, $list['txnid']);
-						$sheet->setCellValue('H'.$key, $list['cash_out_email_address']);
-						$sheet->setCellValue('I'.$key, $list['cash_out_method_message']);
-						$sheet->setCellValue('J'.$key, $list['cash_out_slot_code']);
-						// $sheet->setCellValue('K'.$key, $list['survey_charge']);
-						// $sheet->setCellValue('L'.$key, $list['product_charge']);
-						// $sheet->setCellValue('M'.$key, $list['gc_charge']);
-						// $sheet->setCellValue('N'.$key, $list['cash_out_savings']);
-						// $sheet->setCellValue('O'.$key, $list['cash_out_net_payout_actual']);
-						// $sheet->setCellValue('P'.$key, $list['cash_out_net_payout']);
-						// $sheet->setCellValue('Q'.$key, $list['cash_out_date']);
-					}
-				});
-			}
-		})->export('xls');
-
+		// $data['column']  =   ['Proc','Acct','Type','Name','Amount','Date','TxnId','Email','Description','Slot Code'];
+		
+		$export = new DragonpayPayoutExport($data);
+		return Excel::download($export, 'Payout.xlsx');
 	}
 
 }

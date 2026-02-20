@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Tbl_mlm_unilevel_settings;
 use App\Models\Tbl_membership_unilevel_level;
 use App\Models\Tbl_membership;

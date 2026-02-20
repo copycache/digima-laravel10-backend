@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use App\Models\Tbl_module;
 use App\Models\Tbl_slot;
 use App\Globals\CashOut;

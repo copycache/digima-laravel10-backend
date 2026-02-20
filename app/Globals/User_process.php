@@ -1,10 +1,10 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Validator;
+use DB;
+use Hash;
+use Crypt;
+use Validator;
 use Carbon\Carbon;
 
 use App\Models\Tbl_user_process;

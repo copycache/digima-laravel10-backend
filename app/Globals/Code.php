@@ -1,6 +1,6 @@
 <?php
 namespace App\Globals;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
 use App\Globals\Audit_trail;
 use App\Globals\Slot;
@@ -16,8 +16,8 @@ use App\Models\Tbl_slot_limit;
 use App\Models\Rel_item_kit;
 
 use App\Models\Users;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Request;
+use Validator;
+use Request;
 class Code
 {
 	public static function update_inventory($item_id,$quantity, $branch_id = null)
@@ -59,10 +59,10 @@ class Code
 		$check_alias = Tbl_code_alias::first();
 		if(!$check_alias)
 		{
-			$insert_alias["code_alias_name"] = "DN";
+			$insert_alias["code_alias_name"] = "IEC";
 			Tbl_code_alias::insert($insert_alias);
 
-			$alias = "DN";
+			$alias = "IEC";
 		}
 		else
 		{
@@ -91,8 +91,6 @@ class Code
 				$insert['code_inventory_id'] = $inventory->inventory_id;
 				$insert['code_activation'] = $code[$ctr]['activation'];
 				$insert['code_pin'] = $code[$ctr]['pin'];
-				$insert['inventory_sold'] = 0;
-				$insert['inventory_total'] = 0;
 				Tbl_codes::insert($insert);
 			}
 			else
@@ -366,12 +364,12 @@ class Code
 	{
 		$code_list = Tbl_codes::where('code_sold_to', $user_id)->Inventory()->InventoryItem()->InventoryItemMembership()->where('tbl_item.item_type', 'membership_kit');
 
-		if(($filter['membership'] ?? 'all') != 'all')
+		if($filter['membership'] != 'all')
 		{
 			$code_list->where('tbl_membership.membership_name', $filter['membership']);
 		}
 
-		if(($filter['status'] ?? 'all') != 'all')
+		if($filter['status'] != 'all')
 		{
 			if($filter['status'] == 'Used')
 			{
@@ -385,7 +383,7 @@ class Code
 			$code_list->where('tbl_codes.code_used', $filter['status']);
 		}
 
-		if(isset($filter['search']) && $filter['search'] != '' && $filter['search'] != null)
+		if($filter['search'] != '' || $filter['search'] != null)
 		{
 			$code_list->where("code_activation", "like", "%". $filter["search"] . "%")->orWhere("code_pin", "like", "%". $filter["search"] . "%");
 		}

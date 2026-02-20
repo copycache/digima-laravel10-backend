@@ -1,10 +1,10 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Redirect;
+use Request;
+use Redirect;
 use App\Models\Tbl_dragonpay_transaction;
 use App\Models\Tbl_dragonpay_settings;
 

@@ -2,9 +2,9 @@
 namespace App\Globals;
 
 use App\Models\Tbl_welcome_bonus_commissions;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 
 use App\Globals\Wallet;
 use App\Globals\Log;

@@ -3,9 +3,9 @@ namespace App\Globals;
 
 use App\Models\Tbl_dropshipping_bonus;
 use App\Models\Tbl_dropshipping_bonus_logs;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 use App\Globals\Log;
 
 use App\Models\Tbl_slot;

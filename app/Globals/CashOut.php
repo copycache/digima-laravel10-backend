@@ -1,9 +1,9 @@
 <?php
 namespace App\Globals;
 
-use Illuminate\Support\Facades\DB;
+use DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
+use Request;
 use App\Models\Tbl_cash_out_list;
 use App\Models\Tbl_cash_out_method;
 use App\Models\Tbl_cash_out_schedule;
@@ -21,8 +21,8 @@ use App\Globals\Audit_trail;
 use App\Globals\User_process;
 use App\Models\Tbl_wallet_log;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+use Validator;
+use Hash;
 class CashOut
 {
 	public static function cashout_settings()
@@ -391,7 +391,7 @@ class CashOut
 	
 					if($tin_enabled == 1)
 					{
-						$edited = ($params["edited"] ?? false) == false ? ($params["edited"] ?? false) : true;
+						$edited = $params["edited"] == false ? $params["edited"] : true;
 						$TIN = Request::user()->tin;
 						if (!$TIN) 
 						{
@@ -428,7 +428,7 @@ class CashOut
 							$rules["cash_out_primary_info"]    	= "regex:/([A-Za-z0-9 ])+/";
 							$rules["cash_out_email_address"]    = "email";
 							$rules["cash_out_contact_number"]   = "regex:/^[0-9]*$/|size:11";
-							if(($params["cash_out_method_category"] ?? null) != 'remittance') {
+							if($params["cash_out_method_category"] != 'remittance') {
 								$rules["cash_out_secondary_info"]   = "regex:/([A-Za-z0-9 #])+/";
 							}
 							$validator = Validator::make($params, $rules, $messages);
@@ -469,7 +469,7 @@ class CashOut
 		
 										}
 										
-										if(($params['type'] ?? null) == 'current_slot')
+										if($params['type'] == 'current_slot')
 										{
 											$amount = $slot_info->wallet_amount;
 										}
@@ -501,7 +501,7 @@ class CashOut
 										}
 										else
 										{
-											if(($params['type'] ?? null) == 'current_slot')
+											if($params['type'] == 'current_slot')
 											{
 												$check_pending    = Tbl_cash_out_list::where("cash_out_slot_code", $slot_info->slot_no)
 																	 ->where(function($check_pending) {
@@ -518,7 +518,7 @@ class CashOut
 												$check_pending 		= null;
 												$check_pending_2 	= null;
 											}
-											if(($params['type'] ?? null) == 'current_slot')
+											if($params['type'] == 'current_slot')
 											{
 												$check_value   = Self::double_check_computation($params["cash_out_method_id"],$params["cash_out_amount"]);
 											}
