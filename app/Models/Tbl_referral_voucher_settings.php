@@ -9,6 +9,9 @@ class Tbl_referral_voucher_settings extends Model
     use HasFactory;
 
 	protected $table = 'tbl_referral_voucher_settings';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

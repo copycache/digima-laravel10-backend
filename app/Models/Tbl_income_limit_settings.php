@@ -12,4 +12,7 @@ class Tbl_income_limit_settings extends Model
     protected $table = 'tbl_income_limit_settings';
 	protected $primaryKey = "income_limit_id";
     public $timestamps = false;
+
+    protected $guarded = [];
+
 }

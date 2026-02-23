@@ -12,4 +12,5 @@ class Tbl_achievers_rank extends Model
 	protected $table = 'tbl_achievers_rank';
 	protected $primaryKey = "achievers_rank_id";
     public $timestamps = false;
+	protected $guarded = [];
 }

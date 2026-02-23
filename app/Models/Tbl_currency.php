@@ -10,7 +10,9 @@ class Tbl_currency extends Model
 
 protected $table = 'tbl_currency';
 protected $primaryKey = "currency_id";
-    public $timestamps = false;
+public $timestamps = false;
+protected $guarded = [];
+
 
     public function scopeWallet($query)
     {

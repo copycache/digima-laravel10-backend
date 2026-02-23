@@ -13,6 +13,9 @@ class Tbl_cash_out_list extends Model
 	protected $primaryKey = "cash_out_id";
     public $timestamps = false;
 
+	protected $guarded = [];
+
+
     public function scopeMethod($query)
     {
         $query->select(DB::raw('tbl_cash_out_list.cash_out_method_service_charge as service_charge, tbl_cash_out_list.gc_charge as cashout_gc_charge, tbl_cash_out_list.survey_charge as cashout_survey_charge, tbl_cash_out_list.product_charge as cashout_product_charge, tbl_cash_out_list.*,tbl_cash_out_method.*'));

@@ -8,6 +8,10 @@ class Tbl_marketing_support_setup extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_marketing_support_setup';
     public $timestamps = false;
 }

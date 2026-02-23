@@ -9,6 +9,9 @@ class Tbl_beneficiary extends Model
     use HasFactory;
 
 	protected $table = 'tbl_beneficiary';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

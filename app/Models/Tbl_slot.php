@@ -9,6 +9,8 @@ class Tbl_slot extends Model
 {
     use HasFactory;
 
+protected $guarded = [];
+
 protected $table = 'tbl_slot';
     protected $primaryKey = "slot_id";
     protected $appends  = ['income_receive'=>'total_income_receive','paid_out'=>'amount_paid_out','direct'=>'direct_income','indirect'=>'indirect_income','binary'=>'binary_income','stairstep'=>'stairstep_income','unilevel_bonus'=>'unilevel_bonus_income'];

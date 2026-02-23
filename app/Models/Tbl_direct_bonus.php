@@ -11,4 +11,7 @@ class Tbl_direct_bonus extends Model
 	protected $table = 'tbl_direct_bonus';
 	protected $primaryKey = "direct_bonus_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

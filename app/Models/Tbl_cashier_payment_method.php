@@ -11,4 +11,7 @@ class Tbl_cashier_payment_method extends Model
 	protected $table = 'tbl_cashier_payment_method';
 	protected $primaryKey = "cashier_payment_method_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

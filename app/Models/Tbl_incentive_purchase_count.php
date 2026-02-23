@@ -9,6 +9,10 @@ class Tbl_incentive_purchase_count extends Model
     use HasFactory;
 
 	protected $table = 'tbl_incentive_purchase_count';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

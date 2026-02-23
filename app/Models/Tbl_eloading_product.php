@@ -11,6 +11,9 @@ class Tbl_eloading_product extends Model
 	protected $table = 'tbl_eloading_product';
 	protected $primaryKey = "eloading_product_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
     
 	public function scopeSearch($query,$key)
     {

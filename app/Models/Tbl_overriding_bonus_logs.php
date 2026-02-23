@@ -9,6 +9,9 @@ class Tbl_overriding_bonus_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_overriding_bonus_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

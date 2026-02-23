@@ -9,6 +9,9 @@ class Tbl_announcement extends Model
     use HasFactory;
 
 	protected $table        = 'tbl_announcement';
-	protected $primaryKey   = "id";
+
+	protected $primaryKey = "id";
     public $timestamps      = false;
+
+	protected $guarded = [];
 }

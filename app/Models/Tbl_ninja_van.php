@@ -9,6 +9,9 @@ class Tbl_ninja_van extends Model
     use HasFactory;
 
 	protected $table = 'tbl_ninja_van';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

@@ -8,6 +8,8 @@ class Tbl_tree_sponsor extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_tree_sponsor';
 	protected $primaryKey = "tree_sponsor_id";
     public $timestamps = false;

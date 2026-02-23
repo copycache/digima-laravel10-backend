@@ -9,6 +9,9 @@ class Tbl_team_sales_bonus_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_team_sales_bonus_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

@@ -8,6 +8,10 @@ class Tbl_unilevel_matrix_bonus_levels extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_unilevel_matrix_bonus_levels';
     public $timestamps = false;
 }

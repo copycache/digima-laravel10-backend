@@ -11,4 +11,7 @@ class Tbl_company extends Model
 	protected $table = 'tbl_company';
 	protected $primaryKey = "company_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

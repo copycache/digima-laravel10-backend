@@ -11,4 +11,7 @@ class Tbl_eloading_settings extends Model
 	protected $table = 'tbl_eloading_settings';
 	protected $primaryKey = "eloading_settings_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

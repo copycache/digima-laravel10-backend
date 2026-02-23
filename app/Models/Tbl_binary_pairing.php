@@ -9,5 +9,9 @@ class Tbl_binary_pairing extends Model
     use HasFactory;
 
 	protected $table = 'tbl_binary_pairing';
+
+	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

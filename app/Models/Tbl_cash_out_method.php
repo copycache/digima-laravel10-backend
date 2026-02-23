@@ -11,4 +11,7 @@ class Tbl_cash_out_method extends Model
 	protected $table = 'tbl_cash_out_method';
 	protected $primaryKey = "cash_out_method_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

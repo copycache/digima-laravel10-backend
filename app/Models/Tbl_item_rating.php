@@ -8,6 +8,8 @@ class Tbl_item_rating extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_item_rating';
 	protected $primaryKey = "item_rate_id";
     public $timestamps = false;

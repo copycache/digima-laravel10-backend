@@ -11,4 +11,7 @@ class Tbl_flushout_log extends Model
 	protected $table = 'tbl_flushout_log';
 	protected $primaryKey = "flushout_log_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

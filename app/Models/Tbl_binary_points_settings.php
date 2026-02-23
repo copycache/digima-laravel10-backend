@@ -10,4 +10,10 @@ class Tbl_binary_points_settings extends Model
 
 	protected $table = 'tbl_binary_points_settings';
     public $timestamps = false;
+
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
+
 }

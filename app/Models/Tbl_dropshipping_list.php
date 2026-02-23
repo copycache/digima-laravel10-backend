@@ -9,6 +9,10 @@ class Tbl_dropshipping_list extends Model
     use HasFactory;
 
 	protected $table = 'tbl_dropshipping_list';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

@@ -8,6 +8,8 @@ class Tbl_reverse_pass_up_settings extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_reverse_pass_up_settings';
 	protected $primaryKey = "pass_up_settings_id";
     public $timestamps = false;

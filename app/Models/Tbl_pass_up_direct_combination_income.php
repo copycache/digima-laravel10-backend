@@ -8,6 +8,10 @@ class Tbl_pass_up_direct_combination_income extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_pass_up_direct_combination_income';
     public $timestamps = false;
 }

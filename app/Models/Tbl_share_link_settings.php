@@ -8,6 +8,8 @@ class Tbl_share_link_settings extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_share_link_settings';
 	protected $primaryKey = "share_link_settings_id";
     public $timestamps = false;

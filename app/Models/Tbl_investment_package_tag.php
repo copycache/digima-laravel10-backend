@@ -12,6 +12,9 @@ class Tbl_investment_package_tag extends Model
 	protected $primaryKey = "investment_package_tag_id";
     public $timestamps = false;
 
+	protected $guarded = [];
+
+
     public function scopePackage($query)
     {
     	$query->join('tbl_investment_package','tbl_investment_package.investment_package_id','=','tbl_investment_package_tag.investment_package_id');

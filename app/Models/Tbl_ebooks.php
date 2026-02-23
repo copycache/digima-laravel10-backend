@@ -9,6 +9,10 @@ class Tbl_ebooks extends Model
     use HasFactory;
 
 	protected $table = 'tbl_ebooks';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

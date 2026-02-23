@@ -10,7 +10,9 @@ class Tbl_inventory extends Model
 
 protected $table = 'tbl_inventory';
 protected $primaryKey = "inventory_id";
-    public $timestamps = false;
+public $timestamps = false;
+protected $guarded = [];
+
 
     public function scopeJoinItem($query)
 {

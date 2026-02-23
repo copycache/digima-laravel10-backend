@@ -9,6 +9,9 @@ class Refprovince extends Model
     use HasFactory;
 
 	protected $table = 'refprovince';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

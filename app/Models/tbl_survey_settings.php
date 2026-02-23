@@ -10,5 +10,6 @@ class Tbl_survey_settings extends Model
 
 protected $table = 'tbl_survey_settings';
 protected $primaryKey = "id";
-    public $timestamps = false;
+protected $guarded = [];
+public $timestamps = false;
 }

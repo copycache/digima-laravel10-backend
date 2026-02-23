@@ -9,6 +9,9 @@ class Tbl_retailer_override_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_retailer_override_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

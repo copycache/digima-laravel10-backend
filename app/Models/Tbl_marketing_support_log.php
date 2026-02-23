@@ -8,6 +8,8 @@ class Tbl_marketing_support_log extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_marketing_support_log';
 	protected $primaryKey = "log_id";
     public $timestamps = false;

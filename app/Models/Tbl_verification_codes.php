@@ -9,6 +9,9 @@ class Tbl_verification_codes extends Model
     use HasFactory;
 
 	protected $table = 'tbl_verification_codes';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

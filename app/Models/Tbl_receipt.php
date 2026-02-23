@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_receipt';
 	protected $primaryKey = "receipt_id";
     public $timestamps = false;

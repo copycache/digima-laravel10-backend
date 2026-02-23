@@ -9,8 +9,11 @@ class Tbl_ai_marketing_tools extends Model
     use HasFactory;
 
 	protected $table = 'tbl_ai_marketing_tools';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 
 	public function scopeCategory($query)
     {

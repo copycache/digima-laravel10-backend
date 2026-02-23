@@ -8,6 +8,8 @@ class Tbl_item_stockist_discount extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_item_stockist_discount';
 	protected $primaryKey = "item_stockist_discount_id";
     public $timestamps = false;

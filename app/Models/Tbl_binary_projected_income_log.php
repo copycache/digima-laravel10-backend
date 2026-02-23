@@ -11,4 +11,7 @@ class Tbl_binary_projected_income_log extends Model
 	protected $table = 'tbl_binary_projected_income_log';
 	protected $primaryKey = "log_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

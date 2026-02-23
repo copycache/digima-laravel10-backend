@@ -8,6 +8,8 @@ class Tbl_service_charge extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_service_charge';
 	protected $primaryKey = "service_id";
     public $timestamps = false;

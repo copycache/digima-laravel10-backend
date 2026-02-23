@@ -11,4 +11,7 @@ class Tbl_dealer extends Model
 	protected $table = 'tbl_dealer';
 	protected $primaryKey = "dealer_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

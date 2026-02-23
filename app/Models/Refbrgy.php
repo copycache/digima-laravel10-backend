@@ -9,6 +9,9 @@ class Refbrgy extends Model
     use HasFactory;
 
 	protected $table = 'refbrgy';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

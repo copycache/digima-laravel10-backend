@@ -8,6 +8,10 @@ class Rel_item_kit extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
 	protected $table = 'rel_item_kit';
     public $timestamps = false;
+
+	protected $guarded = [];
 }

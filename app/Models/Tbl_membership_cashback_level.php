@@ -8,6 +8,10 @@ class Tbl_membership_cashback_level extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_membership_cashback_level';
     public $timestamps = false;
 }

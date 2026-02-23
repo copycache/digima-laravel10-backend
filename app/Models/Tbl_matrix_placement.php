@@ -8,6 +8,8 @@ class Tbl_matrix_placement extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_matrix_placement';
 	protected $primaryKey = "matrix_id";
     public $timestamps = false;

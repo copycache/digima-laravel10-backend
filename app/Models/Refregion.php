@@ -9,6 +9,9 @@ class Refregion extends Model
     use HasFactory;
 
 	protected $table = 'refregion';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

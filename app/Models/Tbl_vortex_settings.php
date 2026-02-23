@@ -8,6 +8,10 @@ class Tbl_vortex_settings extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_vortex_settings';
     public $timestamps = false;
 }

@@ -8,6 +8,8 @@ class Tbl_vortex_token_log extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_vortex_token_log';
 	protected $primaryKey = "vortex_token_log_id";
     public $timestamps = false;

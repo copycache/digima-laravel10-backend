@@ -11,4 +11,7 @@ class Tbl_incentive_setup extends Model
 	protected $table = 'tbl_incentive_setup';
 	protected $primaryKey = "setup_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

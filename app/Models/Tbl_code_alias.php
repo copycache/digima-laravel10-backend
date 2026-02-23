@@ -10,4 +10,9 @@ class Tbl_code_alias extends Model
 
 	protected $table = 'tbl_code_alias';
     public $timestamps = false;
+
+	protected $guarded = [];
+
+	protected $primaryKey = "id";
+
 }

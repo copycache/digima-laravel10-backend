@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
     use HasFactory;
 
 	protected $table = 'tbl_receiver_infomation';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 } 

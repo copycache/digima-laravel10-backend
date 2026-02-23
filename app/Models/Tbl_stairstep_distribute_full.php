@@ -8,6 +8,8 @@ class Tbl_stairstep_distribute_full extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_stairstep_distribute_full';
 	protected $primaryKey = "distribute_full_id";
     public $timestamps = false;

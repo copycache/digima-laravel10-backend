@@ -7,6 +7,8 @@ class Tbl_orders extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_orders';
 	protected $primaryKey = "order_id";
     public $timestamps = false;

@@ -8,6 +8,8 @@ class Tbl_slot_transfer extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_slot_transfer';
 	protected $primaryKey = "slot_transfer_id";
     public $timestamps = false;

@@ -10,7 +10,10 @@ class Tbl_reward_items extends Model
     use HasFactory;
 
     protected $table = 'tbl_reward_items';
-	protected $primaryKey = "id";
+
+    protected $primaryKey = "id";
+
+    protected $guarded = [];
     public $timestamps = false;
 
     public function currency()

@@ -12,4 +12,7 @@ class Tbl_indirect_settings extends Model
     protected $table = 'tbl_indirect_settings';
 	protected $primaryKey = "indirect_settings_id";
     public $timestamps = false;
+
+    protected $guarded = [];
+
 }

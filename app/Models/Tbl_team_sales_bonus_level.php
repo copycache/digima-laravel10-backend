@@ -8,6 +8,10 @@ class Tbl_team_sales_bonus_level extends Model
 {
     use HasFactory;
 
+	protected $primaryKey = "id";
+
+	protected $guarded = [];
+
 	protected $table = 'tbl_team_sales_bonus_level';
     public $timestamps = false;
 }

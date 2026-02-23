@@ -8,6 +8,8 @@ class Tbl_override_points extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_override_points';
 	protected $primaryKey = "override_points_id";
     public $timestamps = false;

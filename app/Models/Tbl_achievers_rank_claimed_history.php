@@ -12,6 +12,7 @@ class Tbl_achievers_rank_claimed_history extends Model
 	protected $table = 'tbl_achievers_rank_claimed_history';
 	protected $primaryKey = "id";
     public $timestamps = false;
+	protected $guarded = [];
 
 	public function scopeSlot($query)
     {

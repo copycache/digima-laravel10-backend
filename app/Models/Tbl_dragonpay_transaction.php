@@ -9,6 +9,10 @@ class Tbl_dragonpay_transaction extends Model
     use HasFactory;
 
 	protected $table = 'tbl_dragonpay_transaction';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

@@ -11,5 +11,8 @@ class Tbl_currency_conversion extends Model
 	protected $table = 'tbl_currency_conversion';
 	protected $primaryKey = "currency_conversion_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }
 

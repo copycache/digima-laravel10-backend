@@ -8,6 +8,8 @@ class Tbl_slot_limit extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_slot_limit';
 	protected $primaryKey = "user_id";
     public $timestamps = false;

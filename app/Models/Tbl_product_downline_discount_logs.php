@@ -9,6 +9,9 @@ class Tbl_product_downline_discount_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_product_downline_discount_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

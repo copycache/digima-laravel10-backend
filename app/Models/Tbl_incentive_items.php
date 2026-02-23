@@ -11,4 +11,7 @@ class Tbl_incentive_items extends Model
     protected $table = 'tbl_incentive_items';
 	protected $primaryKey = "item_id";
     public $timestamps = false;
+
+    protected $guarded = [];
+
 }

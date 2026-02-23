@@ -8,6 +8,8 @@ class Tbl_vortex_slot extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_vortex_slot';
 	protected $primaryKey = "vortex_slot_id";
     public $timestamps = false;

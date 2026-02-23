@@ -8,6 +8,8 @@ class Tbl_label extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_label';
 	protected $primaryKey = "label_id";
     public $timestamps = false;

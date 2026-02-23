@@ -8,6 +8,8 @@ class Tbl_mlm_unilevel_settings extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_mlm_unilevel_settings';
 	protected $primaryKey = "mlm_unilevel_settings_id";
     public $timestamps = false;

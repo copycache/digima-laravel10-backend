@@ -8,6 +8,8 @@ class Tbl_membership extends Model
 {
     use HasFactory;
 
+protected $guarded = [];
+
 protected $table = 'tbl_membership';
 protected $primaryKey = "membership_id";
     public $timestamps = false;

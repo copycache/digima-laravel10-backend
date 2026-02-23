@@ -8,6 +8,8 @@ class Tbl_tree_placement extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_tree_placement';
 	protected $primaryKey = "tree_placement_id";
     public $timestamps = false;

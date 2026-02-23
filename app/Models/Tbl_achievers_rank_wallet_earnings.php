@@ -12,6 +12,7 @@ class Tbl_achievers_rank_wallet_earnings extends Model
 	protected $table = 'tbl_achievers_rank_wallet_earnings';
 	protected $primaryKey = "id";
     public $timestamps = false;
+	protected $guarded = [];
 
 	public function scopeSlot($query)
     {

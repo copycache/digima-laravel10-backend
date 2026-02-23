@@ -9,6 +9,9 @@ class Tbl_survey_question extends Model
     use HasFactory;
 
 	protected $table = 'tbl_survey_question';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

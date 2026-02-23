@@ -11,5 +11,8 @@ class Tbl_investment_package extends Model
 	protected $table = 'tbl_investment_package';
 	protected $primaryKey = "investment_package_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }
 

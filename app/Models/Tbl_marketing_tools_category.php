@@ -9,6 +9,9 @@ class Tbl_marketing_tools_category extends Model
     use HasFactory;
 
 	protected $table = 'tbl_marketing_tools_category';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

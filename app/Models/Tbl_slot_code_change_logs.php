@@ -8,6 +8,8 @@ class Tbl_slot_code_change_logs extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_slot_code_change_logs';
 	protected $primaryKey = "slot_code_changes_log_id";
     public $timestamps = false;

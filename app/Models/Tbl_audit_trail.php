@@ -8,7 +8,12 @@ class Tbl_audit_trail extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_audit_trail';
 	protected $primaryKey = "audit_trail_id";
     public $timestamps = false;
+    
+    
+    
 }

@@ -9,6 +9,8 @@ class Tbl_wallet_log extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_wallet_log';
 	protected $primaryKey = "wallet_log_id";
     public $timestamps = false;

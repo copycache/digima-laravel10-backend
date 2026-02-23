@@ -10,6 +10,8 @@ class Users extends Model
 
 protected $table = 'users';
 protected $primaryKey = "id";
+
+protected $guarded = [];
     public $timestamps = false;
 
     public function scopeJoinSlot($query)

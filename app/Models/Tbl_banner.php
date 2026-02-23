@@ -9,6 +9,9 @@ class Tbl_banner extends Model
     use HasFactory;
 
 	protected $table = 'tbl_banner';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

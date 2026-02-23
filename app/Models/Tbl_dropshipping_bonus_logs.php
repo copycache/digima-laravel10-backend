@@ -9,6 +9,10 @@ class Tbl_dropshipping_bonus_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_dropshipping_bonus_logs';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

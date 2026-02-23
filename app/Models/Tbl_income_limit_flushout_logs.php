@@ -12,4 +12,7 @@ class Tbl_income_limit_flushout_logs extends Model
     protected $table = 'tbl_income_limit_flushout_logs';
 	protected $primaryKey = "income_limit_flushout_logs_id";
     public $timestamps = false;
+
+    protected $guarded = [];
+
 }

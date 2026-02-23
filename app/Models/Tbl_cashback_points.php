@@ -11,4 +11,7 @@ class Tbl_cashback_points extends Model
 	protected $table = 'tbl_cashback_points';
 	protected $primaryKey = "cashback_points_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

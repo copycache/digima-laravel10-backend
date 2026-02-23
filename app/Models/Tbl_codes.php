@@ -10,7 +10,8 @@ class Tbl_codes extends Model
 
 protected $table = 'tbl_codes';
 protected $primaryKey = "code_id";
-    public $timestamps = false;
+public $timestamps = false;
+protected $guarded = [];
 
 
     public function scopeInventory($query)

@@ -12,4 +12,7 @@ class Tbl_global_pool_bonus_settings extends Model
     protected $table = 'tbl_global_pool_bonus_settings';
 	protected $primaryKey = "global_pool_bonus_id";
     public $timestamps = false;
+
+    protected $guarded = [];
+
 }

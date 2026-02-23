@@ -11,4 +11,6 @@ class Tbl_admin extends Model
 	protected $table = 'tbl_admin';
 	protected $primaryKey = "admin_id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

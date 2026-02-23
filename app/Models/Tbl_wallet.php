@@ -8,6 +8,8 @@ class Tbl_wallet extends Model
 {
     use HasFactory;
 
+protected $guarded = [];
+
 protected $table = 'tbl_wallet';
 protected $primaryKey = "wallet_id";
     public $timestamps = false;

@@ -11,4 +11,7 @@ class Tbl_code_transfer_logs extends Model
 	protected $table = 'tbl_code_transfer_logs';
 	protected $primaryKey = "code_transfer_log_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

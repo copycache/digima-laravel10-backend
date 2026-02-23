@@ -11,4 +11,7 @@ class Tbl_cashier_bonus extends Model
 	protected $table = 'tbl_cashier_bonus';
 	protected $primaryKey = "cashier_bonus_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

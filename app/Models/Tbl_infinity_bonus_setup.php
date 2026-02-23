@@ -10,4 +10,7 @@ class Tbl_infinity_bonus_setup extends Model
 
 	protected $table = 'tbl_infinity_bonus_setup';
     public $timestamps = false;
+    protected $primaryKey = "infinity_bonus_setup_id";
+
+	protected $guarded = [];
 }

@@ -9,6 +9,9 @@ class Tbl_product_subcategory extends Model
     use HasFactory;
 
 	protected $table = 'tbl_product_subcategory';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

@@ -8,7 +8,10 @@ class Tbl_cart extends Model
 {
     use HasFactory;
 
+protected $guarded = [];
+
 protected $table = 'tbl_cart';
 protected $primaryKey = "cart_id";
-    public $timestamps = false;
+public $timestamps = false;
+
 }

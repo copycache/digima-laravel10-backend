@@ -12,6 +12,8 @@ class Tbl_adjust_wallet_log extends Model
 	protected $primaryKey = "adjust_wallet_id";
     public $timestamps = false;
 
+	protected $guarded = [];
+
     public function scopeSlot($query)
     {
     	 return $query->leftJoin('tbl_slot', 'tbl_slot.slot_id', '=', 'tbl_adjust_wallet_log.slot_id');

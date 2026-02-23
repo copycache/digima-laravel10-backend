@@ -8,6 +8,8 @@ class Tbl_module extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_module';
 	protected $primaryKey = "module_id";
     public $timestamps = false;

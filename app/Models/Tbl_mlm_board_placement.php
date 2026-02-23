@@ -8,6 +8,8 @@ class Tbl_mlm_board_placement extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $table = 'tbl_mlm_board_placement';
     protected $primaryKey = "mlm_board_placement_id";
     public $timestamps = false;

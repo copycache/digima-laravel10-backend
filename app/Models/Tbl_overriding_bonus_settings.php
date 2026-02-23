@@ -9,6 +9,9 @@ class Tbl_overriding_bonus_settings extends Model
     use HasFactory;
 
 	protected $table = 'tbl_overriding_bonus_settings';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

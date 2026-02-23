@@ -8,6 +8,8 @@ class Tbl_watched_videos extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_watched_videos';
 	protected $primaryKey = "watched_id";
     public $timestamps = false;

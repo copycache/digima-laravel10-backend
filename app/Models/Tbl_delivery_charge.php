@@ -11,4 +11,7 @@ class Tbl_delivery_charge extends Model
 	protected $table = 'tbl_delivery_charge';
 	protected $primaryKey = "method_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

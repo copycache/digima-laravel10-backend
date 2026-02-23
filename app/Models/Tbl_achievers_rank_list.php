@@ -12,7 +12,7 @@ class Tbl_achievers_rank_list extends Model
 	protected $table = 'tbl_achievers_rank_list';
 	protected $primaryKey = "list_id";
     public $timestamps = false;
-
+	protected $guarded = [];
 	
 	public function scopeSlot($query)
     {

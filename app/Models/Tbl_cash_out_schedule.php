@@ -11,4 +11,7 @@ class Tbl_cash_out_schedule extends Model
 	protected $table = 'tbl_cash_out_schedule';
 	protected $primaryKey = "schedule_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

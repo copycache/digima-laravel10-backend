@@ -8,6 +8,8 @@ class Tbl_unilevel_or_distribute_full extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_unilevel_or_distribute_full';
 	protected $primaryKey = "distribute_full_id	";
     public $timestamps = false;

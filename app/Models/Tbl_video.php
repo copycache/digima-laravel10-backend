@@ -8,6 +8,8 @@ class Tbl_video extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_video';
 	protected $primaryKey = "video_id";
     public $timestamps = false;

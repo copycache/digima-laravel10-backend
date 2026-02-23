@@ -8,6 +8,8 @@ class Tbl_mlm_board_slot extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $table = 'tbl_mlm_board_slot';
     protected $primaryKey = "board_slot_id";
     public $timestamps = false;

@@ -9,6 +9,9 @@ class Tbl_product_direct_referral_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_product_direct_referral_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

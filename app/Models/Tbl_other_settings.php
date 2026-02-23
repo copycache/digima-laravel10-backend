@@ -8,6 +8,8 @@ class Tbl_other_settings extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_other_settings';
 	protected $primaryKey = "other_settings_id";
     public $timestamps = false;

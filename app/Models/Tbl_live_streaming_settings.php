@@ -9,6 +9,9 @@ class Tbl_live_streaming_settings extends Model
     use HasFactory;
 
 	protected $table = 'tbl_live_streaming_settings';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }

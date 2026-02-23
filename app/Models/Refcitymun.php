@@ -9,6 +9,9 @@ class Refcitymun extends Model
     use HasFactory;
 
 	protected $table = 'refcitymun';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
 }

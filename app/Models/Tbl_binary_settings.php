@@ -11,4 +11,7 @@ class Tbl_binary_settings extends Model
 	protected $table = 'tbl_binary_settings';
 	protected $primaryKey = "binary_settings_id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

@@ -8,6 +8,8 @@ class Tbl_stairstep_items extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_stairstep_items';
 	protected $primaryKey = "tbl_stairstep_items_id";
     public $timestamps = false;

@@ -8,6 +8,8 @@ class Tbl_milestone_bonus_settings extends Model
 {
     use HasFactory;
 
+	protected $guarded = [];
+
 	protected $table = 'tbl_milestone_bonus_settings';
 	protected $primaryKey = "milestone_settings_id";
     public $timestamps = true;

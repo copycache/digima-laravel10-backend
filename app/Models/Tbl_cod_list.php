@@ -9,6 +9,10 @@ class Tbl_cod_list extends Model
     use HasFactory;
 
 	protected $table = 'tbl_cod_list';
+
 	protected $primaryKey = "id";
     public $timestamps = false;
+
+	protected $guarded = [];
+
 }

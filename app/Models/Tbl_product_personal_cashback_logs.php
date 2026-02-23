@@ -9,6 +9,9 @@ class Tbl_product_personal_cashback_logs extends Model
     use HasFactory;
 
 	protected $table = 'tbl_product_personal_cashback_logs';
+
 	protected $primaryKey = "id";
+
+	protected $guarded = [];
     public $timestamps = false;
 }
