@@ -35,7 +35,7 @@ class MemberMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if ($request->user()->type == "member" || $request->user()->type == "admin")
+        if ($request->user()->type == "member")
         {
             return $next($request);
         }

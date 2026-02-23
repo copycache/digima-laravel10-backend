@@ -15,7 +15,7 @@ class Cors
      */
     public function handle($request, Closure $next)
     {
-        $trusted_domains = ["http://localhost:4200", "http://localhost:4201","https://staging-app.domusnaturaeglobal.com","https://www.domusnaturaeglobal.com", "https://domusnaturaeglobal.com"];
+        $trusted_domains = ["http://localhost:4200","http://localhost:4201","https://staging-app.iqonelitecorp.com","https://www.iqonelitecorp.com", "https://iqonelitecorp.com"];
          
     if(isset($request->server()['HTTP_ORIGIN'])) 
         {

@@ -442,7 +442,7 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::post('/banner/edit', 'Admin\AdminBannerController@edit');
     Route::post('/banner/update', 'Admin\AdminBannerController@update');
     Route::post('/banner/delete', 'Admin\AdminBannerController@delete');
-    Route::post('/banner/restore', 'Admin\AdminBa   nnerController@restore');
+    Route::post('/banner/restore', 'Admin\AdminBannerController@restore');
 
     // EBOOKS
     Route::post('/ebooks/add', 'Admin\AdminEbooksController@add');
