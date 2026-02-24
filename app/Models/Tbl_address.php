@@ -11,9 +11,7 @@ class Tbl_address extends Model
 	protected $table = 'tbl_address';
 	protected $primaryKey = "address_id";
     public $timestamps = false;
-
-	protected $guarded = [];
-
+    protected $guarded = [];
     public function scopeAddress($query)
     {
     	$query = $query->leftjoin('refregion',	'refregion.regCode',	 	'=','tbl_address.regCode');

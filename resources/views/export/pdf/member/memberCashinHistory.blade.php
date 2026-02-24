@@ -39,12 +39,12 @@
 							</tr>
 							@foreach($_list as $list)
 							<tr>
-								<td>{{ date("F j, Y",strtotime($list->cash_in_date))}}</td>
-								<td>{{ $list->cash_in_status == "processing"  || $list->cash_in_status == "pending" ? "Processing" : date("F j, Y",strtotime($list->cash_in_date))}}</td>
-								<td>{{ $list->cash_in_status == "approved" ? "Processed" : "Processing"}}</td>
-								<td>{{ number_format($list->cash_in_receivable),2}}</td>
-								<td>{{ number_format($list->cash_in_charge),2}}</td>
-								<td>{{ number_format($list->cash_in_payable),2}}</td>
+								<td>{{ date("F j, Y", strtotime($list->cash_in_date)) }}</td>
+								<td>{{ ($list->cash_in_status == "processing" || $list->cash_in_status == "pending") ? "Processing" : date("F j, Y", strtotime($list->cash_in_date)) }}</td>
+								<td>{{ $list->cash_in_status == "approved" ? "Processed" : "Processing" }}</td>
+								<td>{{ number_format($list->cash_in_receivable, 2) }}</td>
+								<td>{{ number_format($list->cash_in_charge, 2) }}</td>
+								<td>{{ number_format($list->cash_in_payable, 2) }}</td>
 							</tr>
 							@endforeach
 						</table>
@@ -56,6 +56,6 @@
 		<br>
 		
 		<br><br><br>
-		<div class="pdf-footer">PDF GENERATED : {{date("F j, Y",strtotime(date('Y-m-d')))}}</div>
+		<div class="pdf-footer">PDF GENERATED : {{ date("F j, Y") }}</div>
 	</body>
 </html>

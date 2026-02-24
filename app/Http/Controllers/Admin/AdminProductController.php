@@ -7,7 +7,7 @@ use App\Models\Tbl_cashier;
 use App\Models\Tbl_codes;
 use App\Models\Tbl_inventory;
 use App\Models\Tbl_item;
-use App\Models\Users;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 

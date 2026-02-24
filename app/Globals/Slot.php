@@ -8,7 +8,7 @@ use App\Models\Tbl_points_log;
 use App\Models\Tbl_inventory;
 use App\Models\Tbl_codes;
 use App\Models\Tbl_welcome_bonus_commissions;
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_tree_placement;
 use App\Models\Tbl_tree_sponsor;
 use App\Models\Tbl_stairstep_rank;
@@ -88,12 +88,12 @@ class Slot
 	}
 	public static function transfer($owner_id,$slot_id,$password,$transferred_to)
 	{
-		$owner_info         = Users::where("id",$owner_id)->first();
+		$owner_info         = User::where("id",$owner_id)->first();
 		if($owner_info->registered_as_retailer == 0)
 		{
 			if(Hash::check($password, $owner_info->password))
 			{
-				$transferred_info = Users::where("email",$transferred_to)->first();
+				$transferred_info = User::where("email",$transferred_to)->first();
 				if($transferred_info)
 				{
 					if($transferred_info->registered_as_retailer == 0)
@@ -447,7 +447,7 @@ class Slot
 						{
 							$slot_sponsor 				       = Tbl_slot::where("slot_no",$data["slot_sponsor"])->first();
 							$membership_id                     = Code::get_membership($data["code"],$data["pin"]);
-							$user                              = Users::where("id",$data["slot_owner"])->first();
+							$user                              = User::where("id",$data["slot_owner"])->first();
 
 							$check_default_added_days          = Tbl_other_settings::where("key","default_added_days")->first() ? Tbl_other_settings::where("key","default_added_days")->first()->value : 0;
 							if($check_default_added_days == 0)
@@ -508,7 +508,7 @@ class Slot
 						{
 							$slot_sponsor 				       = Tbl_slot::where("slot_no",$data["slot_sponsor"])->first();
 							$membership_id                     = Code::get_membership($data["code"],$data["pin"]);
-							$user                              = Users::where("id",$data["slot_owner"])->first();
+							$user                              = User::where("id",$data["slot_owner"])->first();
 							$check_default_added_days          = Tbl_other_settings::where("key","default_added_days")->first() ? Tbl_other_settings::where("key","default_added_days")->first()->value : 0;
 							if($check_default_added_days == 0)
 							{
@@ -674,7 +674,7 @@ class Slot
 		elseif($member_result['status_message'][0] == "The email has already been taken.")
 		{
 			$data['slot_owner'] = $member_result['status_data_id'];
-			$owner = Users::where('email',$register['email'])->value('id');
+			$owner = User::where('email',$register['email'])->value('id');
 			$status = Self::create_blank_slot($data['slot_owner'],0,0,0,0,$custom_slot_no);
 			return $status;
 		}
@@ -732,7 +732,7 @@ class Slot
 		}
 		elseif($member_result['status_message'][0] == "The email has already been taken.")
 		{
-			$owner = Users::where('email',$register['email'])->value('id');
+			$owner = User::where('email',$register['email'])->value('id');
 			$data['slot_owner'] = $owner;
 			$data['slot_sponsor'] = $data['sponsor'];
 			$inventory = Tbl_inventory::where('inventory_branch_id', 1)->where('inventory_item_id', $data['package_number'])->value('inventory_id');
@@ -922,7 +922,7 @@ class Slot
 					}
 					else if($member_result['status_message'][0] == "The email has already been taken.")
 					{
-						$owner = Users::where('email',$register['email'])->value('id');
+						$owner = User::where('email',$register['email'])->value('id');
 						$data['code'] = $code->code_activation;
 						$data['pin']  = $code->code_pin;
 						$data['import'] = 1;
@@ -979,7 +979,7 @@ class Slot
 	// 		}
 	// 		else
 	// 		{
-	// 			$sponsor = Users::where("users.name", "like", '%'.str_replace(' ','%',$data['sponsor']). '%')->first();
+	// 			$sponsor = User::where("users.name", "like", '%'.str_replace(' ','%',$data['sponsor']). '%')->first();
 	// 			if($sponsor)
 	// 			{
 	// 				$sponsor_check = Tbl_slot::where('slot_owner', $sponsor->id)->first();
@@ -1041,7 +1041,7 @@ class Slot
 
 	public static function create_blank_slot($owner,$sponsor = 0,$slot_link = null, $stockist_slot = 0,$dealer_code = 0,$custom_slot_no = null,$item_id = null)
 	{
-		$user = Users::where("id",$owner)->first();
+		$user = User::where("id",$owner)->first();
 		$insert['slot_id_number'] = Slot::generate_slot_id_number();
 		$insert["slot_owner"]              = $user->id;
 		$insert["slot_sponsor"]            = $slot_link == "referral" ? $sponsor : 0;
@@ -1810,7 +1810,7 @@ class Slot
         	$update_user["country_id"] = $request["country_id"];
 			$update_user["email_verified"] = $request["email_verified"];
 			$update_user["verified"] = $request["verified"];
-			$company_account_exist = Users::where('company_account', 1)->first();
+			$company_account_exist = User::where('company_account', 1)->first();
 
 			if ($company_account_exist && $request["company_account"] == 1 && $company_account_exist->id != $user_id) {
 				$return["status"] = "Error";
@@ -1840,11 +1840,11 @@ class Slot
         		$update_user["password"] = Hash::make($request["show_password"]);
 			}
 			//audit trail old value
-			$old_value['user'] = Users::where("id", $user_id)->first();
+			$old_value['user'] = User::where("id", $user_id)->first();
 			//end
-			Users::where("id", $user_id)->update($update_user);
+			User::where("id", $user_id)->update($update_user);
 			//audit trail new value
-			$new_value['user'] = Users::where("id", $user_id)->first();
+			$new_value['user'] = User::where("id", $user_id)->first();
 			//end
 			if(isset($request['user']))
 			{

@@ -5,8 +5,8 @@ use App\Globals\Item;
 use App\Models\Cart;
 use App\Models\Tbl_address;
 use App\Models\Tbl_branch;
-use App\Models\Tbl_item;
 use App\Models\Tbl_inventory;
+use App\Models\Tbl_item;
 use App\Models\Tbl_receipt;
 use App\Models\Tbl_slot;
 use Carbon\Carbon;
@@ -20,37 +20,105 @@ class MemberOrderController extends MemberController
         $latest = \DB::table('tbl_orders')->orderBy('order_id', 'desc')->first();
         return response()->json($latest);
     }
-    
+
     public function get_orders()
     {
         $slot_id = Request::input('slot_id');
-        $status = ['all', 'pending', 'delivered', 'completed', 'cancelled', 'pickup'];
-        foreach ($status as $st => $stats) {
-            $query = DB::table('tbl_orders')->where('buyer_slot_id', $slot_id)->where('order_from', 'ecommerce')->where('order_status', '!=', null)->orderBy('order_date_created', 'DESC');
-            $orders[$stats] = $stats == 'all' ? $query->get() : $query->where('order_status', $stats)->get();
-            $orders[$stats . '_count'] = count($orders[$stats]);
-            foreach ($orders[$stats] as $key => $value) {
-                $buyer = Tbl_slot::where('slot_id', $value->buyer_slot_id)->join('users', 'users.id', '=', 'tbl_slot.slot_owner')->first();
-                $address = Tbl_address::Address()->where('user_id', $buyer->id)->where('is_default', 1)->first();
-                $orders[$stats][$key]->order_number = sprintf("%08d", $value->order_id);
-                $orders[$stats][$key]->buyer_info = $buyer;
-                $orders[$stats][$key]->default_address = $address == null ? "INVALID" : $address;
-                $orders[$stats][$key]->receipt = Tbl_receipt::where('receipt_id', $value->order_id)->first();
-                $orders[$stats][$key]->order_date_created = date("F j, Y g:ia", strtotime($value->order_date_created));
-                $orders[$stats][$key]->order_date_delivered = $value->order_date_delivered == null ? null : date("F j, Y g:ia", strtotime($value->order_date_delivered));
-                $orders[$stats][$key]->receipt['branch_address'] = Tbl_branch::where('branch_id', $orders[$stats][$key]->receipt['retailer'])->pluck('branch_location')->first();
+        $statuses = ['pending', 'delivered', 'completed', 'cancelled', 'pickup'];
 
-                $items = json_decode($value->items);
-                foreach ($items as $key2 => $value2) {
-                    $orders[$stats][$key]->item[$key2] = DB::table('tbl_item')->where('item_id', $value2->item_id)->first();
-                    $orders[$stats][$key]->item[$key2]->item_price = $value2->discounted_price > 0 ? $value2->discounted_price : DB::table('tbl_item')->where('item_id', $value2->item_id)->first()->item_price;
-                    $orders[$stats][$key]->item[$key2]->quantity = $value2->quantity;
-                    $orders[$stats][$key]->item[$key2]->ratings = Item::get_ratings($value2->item_id, $buyer->id, sprintf("%08d", $value->order_id));
+        // Fetch buyer and address once
+        $buyer = Tbl_slot::where('slot_id', $slot_id)->join('users', 'users.id', '=', 'tbl_slot.slot_owner')->first();
+        $address = $buyer ? Tbl_address::Address()->where('user_id', $buyer->id)->where('is_default', 1)->first() : null;
+        $default_address = $address ?? 'INVALID';
+
+        // Fetch all orders for this slot
+        $all_orders = DB::table('tbl_orders')
+            ->where('buyer_slot_id', $slot_id)
+            ->where('order_from', 'ecommerce')
+            ->whereNotNull('order_status')
+            ->orderBy('order_date_created', 'DESC')
+            ->get();
+
+        $order_ids = $all_orders->pluck('order_id');
+        $receipts_map = Tbl_receipt::whereIn('receipt_id', $order_ids)->get()->keyBy('receipt_id');
+        $branch_ids = $receipts_map->pluck('retailer')->unique()->filter();
+        $branches_map = Tbl_branch::whereIn('branch_id', $branch_ids)->pluck('branch_location', 'branch_id');
+
+        $all_item_ids = collect();
+        foreach ($all_orders as $order) {
+            $order_items = json_decode($order->items);
+            if (is_array($order_items)) {
+                foreach ($order_items as $it) {
+                    $all_item_ids->push($it->item_id);
                 }
             }
         }
+        $items_map = Tbl_item::whereIn('item_id', $all_item_ids->unique())->get()->keyBy('item_id');
+
+        // Pre-fetch ratings in bulk
+        $ratings_map = DB::table('tbl_item_rating')
+            ->whereIn('item_id', $all_item_ids->unique())
+            ->where('user_id', $buyer->id)
+            ->whereIn('item_rate_order_number', $all_orders->map(fn($o) => sprintf('%08d', $o->order_id)))
+            ->get()
+            ->groupBy(fn($r) => $r->item_id . '_' . $r->item_rate_order_number);
+
+        $processed_orders = $all_orders->map(function ($value) use ($buyer, $default_address, $receipts_map, $branches_map, $items_map, $ratings_map) {
+            $value->order_number = sprintf('%08d', $value->order_id);
+            $value->buyer_info = $buyer;
+            $value->default_address = $default_address;
+
+            $receipt = $receipts_map->get($value->order_id);
+            if ($receipt) {
+                $receipt->branch_address = $branches_map->get($receipt->retailer);
+            }
+            $value->receipt = $receipt;
+
+            $value->order_date_created_formatted = date('F j, Y g:ia', strtotime($value->order_date_created));
+            $value->order_date_delivered_formatted = $value->order_date_delivered == null ? null : date('F j, Y g:ia', strtotime($value->order_date_delivered));
+
+            $items = json_decode($value->items);
+            $final_items = [];
+            if (is_array($items)) {
+                foreach ($items as $key2 => $value2) {
+                    $item_data = $items_map->get($value2->item_id);
+                    if ($item_data) {
+                        $item_copy = clone $item_data;
+                        $item_copy->item_price = $value2->discounted_price > 0 ? $value2->discounted_price : $item_data->item_price;
+                        $item_copy->quantity = $value2->quantity;
+
+                        $rating_key = $value2->item_id . '_' . $value->order_number;
+                        $rating_info = $ratings_map->get($rating_key, collect())->first();
+
+                        $item_copy->ratings = $rating_info ?: [
+                            'item_rate' => 0,
+                            'item_id' => $value2->item_id,
+                            'user_id' => $buyer->id,
+                            'item_review' => '',
+                            'item_rate_order_number' => null,
+                            'item_is_disabled' => 0
+                        ];
+                        $final_items[$key2] = $item_copy;
+                    }
+                }
+            }
+            $value->item = $final_items;
+            return $value;
+        });
+
+        $orders = [];
+        $orders['all'] = $processed_orders;
+        $orders['all_count'] = $processed_orders->count();
+
+        foreach ($statuses as $status) {
+            $filtered = $processed_orders->where('order_status', $status)->values();
+            $orders[$status] = $filtered;
+            $orders[$status . '_count'] = $filtered->count();
+        }
+
         return response()->json($orders, 200);
     }
+
     public function claim_code_claimed()
     {
         $receipt_id = Request::input('receipt_id');
@@ -58,6 +126,7 @@ class MemberOrderController extends MemberController
         $response = Self::select_claim_codes($receipt_id, $claim_code);
         return response()->json($response);
     }
+
     public static function select_claim_codes($receipt_id, $claim_code = null)
     {
         if (isset($claim_code)) {
@@ -68,29 +137,34 @@ class MemberOrderController extends MemberController
 
                 Tbl_receipt::where('receipt_id', $receipt_id)->update($update);
 
-                $update2['order_status'] = "claimed";
+                $update2['order_status'] = 'claimed';
                 $update2['date_status_changed'] = Carbon::now();
                 DB::table('tbl_orders')->where('order_id', $check_receipt->receipt_order_id)->update($update2);
 
-                $return["status"] = "success";
-                $return["status_code"] = 200;
-                $return["status_message"] = "Order Received!";
+                $return['status'] = 'success';
+                $return['status_code'] = 200;
+                $return['status_message'] = 'Order Received!';
             } else {
-                $return["status"] = "error";
-                $return["status_code"] = 400;
-                $return["status_message"] = "Claim code either used or invalid!";
+                $return['status'] = 'error';
+                $return['status_code'] = 400;
+                $return['status_message'] = 'Claim code either used or invalid!';
             }
         } else {
             $return = Tbl_receipt::where('receipt_id', $receipt_id)->first();
 
             $items = json_decode($return->items);
+            $item_ids = collect($items)->pluck('item_id')->unique()->filter();
+            $skus_map = Tbl_item::whereIn('item_id', $item_ids)->pluck('item_sku', 'item_id');
 
+            $final_items = [];
             foreach ($items as $key => $value) {
-                $item[$key] = Tbl_item::where('item_id', $value->item_id)->select('item_sku')->first();
-                $item[$key]->quantity = $value->quantity;
+                $final_items[$key] = (object) [
+                    'item_sku' => $skus_map->get($value->item_id),
+                    'quantity' => $value->quantity
+                ];
             }
 
-            $return['items'] = $item;
+            $return['items'] = $final_items;
         }
 
         return $return;
@@ -99,12 +173,10 @@ class MemberOrderController extends MemberController
     public function addToCart(Request $request)
     {
         try {
-
             $items = Request::input('checkout_items');
 
             foreach ($items as $item) {
-
-                //check if already exists
+                // check if already exists
                 $record = Cart::where('item_sku', $item['item_sku'])->first();
 
                 if ($record) {
@@ -164,22 +236,19 @@ class MemberOrderController extends MemberController
                 $cart->upgrade_own = $item['upgrade_own'];
                 $cart->item_charged = $item['item_charged'];
 
-
                 if ($cart->save()) {
                     return response()->json($item);
                 }
             }
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json($e->getMessage());
         }
-
     }
 
     public function getCartItems()
     {
         $data = Request::input();
-        $items = Cart::where('slot_owner', $data['slot_owner'])->leftjoin('tbl_branch','tbl_branch.branch_id','inventory_branch_id')->get();
+        $items = Cart::where('slot_owner', $data['slot_owner'])->leftjoin('tbl_branch', 'tbl_branch.branch_id', 'inventory_branch_id')->get();
         return response()->json($items);
     }
 
@@ -203,7 +272,7 @@ class MemberOrderController extends MemberController
     {
         try {
             $product_id = Request::input('product_id');
-            $quantity   = Request::input('quantity') ?? 1;
+            $quantity = Request::input('quantity') ?? 1;
             $slot_owner = Request::input('slot_owner');
 
             if (!$product_id || !$slot_owner) {
@@ -223,60 +292,60 @@ class MemberOrderController extends MemberController
             $existing = Cart::where('item_sku', $item->item_sku)->where('slot_owner', $slot_owner)->first();
             $cart = $existing ? $existing : new Cart;
 
-            $cart->slot_owner              = $slot_owner;
-            $cart->product_id              = $product_id;
-            $cart->item_id                 = $item->item_id;
-            $cart->item_sku                = $item->item_sku ?? '';
-            $cart->item_barcode            = $item->item_barcode ?? '';
-            $cart->item_description        = $item->item_description ?? '';
-            $cart->item_price              = $item->item_price ?? 0;
-            $cart->item_gc_price           = $item->item_gc_price ?? 0;
-            $cart->item_pv                 = $item->item_pv ?? 0;
-            $cart->item_thumbnail          = $item->item_thumbnail ?? '';
-            $cart->item_type               = $item->item_type ?? 'product';
-            $cart->item_category           = $item->item_category ?? 0;
-            $cart->item_sub_category       = $item->item_sub_category ?? 0;
-            $cart->item_availability       = $item->item_availability ?? 1;
-            $cart->item_date_created       = $item->item_date_created ?? now();
-            $cart->item_points_currency    = $item->item_points_currency ?? 0;
-            $cart->item_points_incetives   = $item->item_points_incetives ?? 0;
-            $cart->item_vortex_token       = $item->item_vortex_token ?? 0;
-            $cart->item_qty                = $existing ? $existing->item_qty + $quantity : $quantity;
-            $cart->item_charged            = $item->item_price ?? 0;
-            $cart->discounted_price        = $item->discounted_price ?? 0;
+            $cart->slot_owner = $slot_owner;
+            $cart->product_id = $product_id;
+            $cart->item_id = $item->item_id;
+            $cart->item_sku = $item->item_sku ?? '';
+            $cart->item_barcode = $item->item_barcode ?? '';
+            $cart->item_description = $item->item_description ?? '';
+            $cart->item_price = $item->item_price ?? 0;
+            $cart->item_gc_price = $item->item_gc_price ?? 0;
+            $cart->item_pv = $item->item_pv ?? 0;
+            $cart->item_thumbnail = $item->item_thumbnail ?? '';
+            $cart->item_type = $item->item_type ?? 'product';
+            $cart->item_category = $item->item_category ?? 0;
+            $cart->item_sub_category = $item->item_sub_category ?? 0;
+            $cart->item_availability = $item->item_availability ?? 1;
+            $cart->item_date_created = $item->item_date_created ?? now();
+            $cart->item_points_currency = $item->item_points_currency ?? 0;
+            $cart->item_points_incetives = $item->item_points_incetives ?? 0;
+            $cart->item_vortex_token = $item->item_vortex_token ?? 0;
+            $cart->item_qty = $existing ? $existing->item_qty + $quantity : $quantity;
+            $cart->item_charged = $item->item_price ?? 0;
+            $cart->discounted_price = $item->discounted_price ?? 0;
 
             // Inventory fields
-            $cart->inventory_id            = $inventory->inventory_id ?? 0;
-            $cart->inventory_item_id       = $inventory->inventory_item_id ?? $product_id;
-            $cart->inventory_branch_id     = $inventory->inventory_branch_id ?? 1;
-            $cart->inventory_quantity       = $inventory->inventory_quantity ?? 0;
-            $cart->inventory_sold          = $inventory->inventory_sold ?? 0;
-            $cart->inventory_status        = $inventory->inventory_status ?? 'active';
-            $cart->inventory_total         = $inventory->inventory_total ?? 0;
-            $cart->item_inventory_id       = $inventory->inventory_id ?? 0;
+            $cart->inventory_id = $inventory->inventory_id ?? 0;
+            $cart->inventory_item_id = $inventory->inventory_item_id ?? $product_id;
+            $cart->inventory_branch_id = $inventory->inventory_branch_id ?? 1;
+            $cart->inventory_quantity = $inventory->inventory_quantity ?? 0;
+            $cart->inventory_sold = $inventory->inventory_sold ?? 0;
+            $cart->inventory_status = $inventory->inventory_status ?? 'active';
+            $cart->inventory_total = $inventory->inventory_total ?? 0;
+            $cart->item_inventory_id = $inventory->inventory_id ?? 0;
 
             // Default values for optional fields
-            $cart->added_days              = $item->added_days ?? 0;
-            $cart->archived                = 0;
-            $cart->bind_membership_id      = $item->bind_membership_id ?? 0;
-            $cart->cashback_points         = $item->cashback_points ?? 0;
-            $cart->cashback_wallet         = $item->cashback_wallet ?? 0;
-            $cart->code_user               = 0;
-            $cart->direct_cashback         = $item->direct_cashback ?? 0;
+            $cart->added_days = $item->added_days ?? 0;
+            $cart->archived = 0;
+            $cart->bind_membership_id = $item->bind_membership_id ?? 0;
+            $cart->cashback_points = $item->cashback_points ?? 0;
+            $cart->cashback_wallet = $item->cashback_wallet ?? 0;
+            $cart->code_user = 0;
+            $cart->direct_cashback = $item->direct_cashback ?? 0;
             $cart->direct_cashback_membership = $item->direct_cashback_membership ?? 0;
-            $cart->inclusive_gc             = $item->inclusive_gc ?? 0;
-            $cart->is_kit_upgrade          = 0;
-            $cart->membership_id           = 0;
+            $cart->inclusive_gc = $item->inclusive_gc ?? 0;
+            $cart->is_kit_upgrade = 0;
+            $cart->membership_id = 0;
             $cart->org_shipping_fee_lalamove = 0;
-            $cart->org_shipping_fee_ninja  = 0;
-            $cart->qty_charged             = $quantity;
-            $cart->qty_fee_lalamove        = 0;
-            $cart->qty_fee_ninja_van       = 0;
-            $cart->shipping_fee_lalamove   = 0;
-            $cart->shipping_fee_ninja      = 0;
-            $cart->slot_qty                = $quantity;
-            $cart->tag_as                  = $item->tag_as ?? '';
-            $cart->upgrade_own             = 0;
+            $cart->org_shipping_fee_ninja = 0;
+            $cart->qty_charged = $quantity;
+            $cart->qty_fee_lalamove = 0;
+            $cart->qty_fee_ninja_van = 0;
+            $cart->shipping_fee_lalamove = 0;
+            $cart->shipping_fee_ninja = 0;
+            $cart->slot_qty = $quantity;
+            $cart->tag_as = $item->tag_as ?? '';
+            $cart->upgrade_own = 0;
 
             $cart->save();
 
@@ -292,7 +361,7 @@ class MemberOrderController extends MemberController
     public function updateCartItem()
     {
         try {
-            $id       = Request::input('id');
+            $id = Request::input('id');
             $quantity = Request::input('quantity');
 
             if (!$id || !$quantity) {
@@ -304,9 +373,9 @@ class MemberOrderController extends MemberController
                 return response()->json(['status' => 'error', 'message' => 'Cart item not found.'], 404);
             }
 
-            $cart->item_qty    = $quantity;
+            $cart->item_qty = $quantity;
             $cart->qty_charged = $quantity;
-            $cart->slot_qty    = $quantity;
+            $cart->slot_qty = $quantity;
             $cart->save();
 
             return response()->json(['status' => 'success', 'message' => 'Quantity updated.', 'cart' => $cart]);
@@ -314,5 +383,4 @@ class MemberOrderController extends MemberController
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
-
 }

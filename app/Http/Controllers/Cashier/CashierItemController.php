@@ -25,7 +25,7 @@ use App\Models\Tbl_tree_placement;
 use App\Models\Tbl_user_process;
 use PDF;
 use Excel;
-use App\Models\Users;
+use App\Models\User;
 use App\Globals\Slot;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -61,7 +61,7 @@ class CashierItemController extends CashierController
     }
     public function checkout()
     {
-        $user = Users::where('id', Request::user()->id)->first();
+        $user = User::where('id', Request::user()->id)->first();
         if($user->type == "cashier")
         {
             $cashier   = Request::user()->id;
@@ -83,7 +83,7 @@ class CashierItemController extends CashierController
         $gc_currency = DB::table('tbl_currency')->where('currency_name', 'Gift Card')->first();
         $response['slot'] = Tbl_slot::where('slot_owner', $data['user_id'])->Wallet($currency->currency_id)->where('slot_status', 'active')->first();
         $response['other_slots'] = Tbl_slot::where('slot_owner', $data['user_id'])->where('slot_status', 'active')->get();
-        $response['user'] = Users::where('id', $data['user_id'])->first();
+        $response['user'] = User::where('id', $data['user_id'])->first();
         $response['address'] = Tbl_address::where('user_id', $data['user_id'])->where('is_default', 1)->first();
         $response['slot_gc'] = Tbl_slot::where('slot_owner', $data['user_id'])->Wallet($gc_currency->currency_id)->where('slot_status', 'active')->first();
         return response()->json($response);
@@ -120,10 +120,10 @@ class CashierItemController extends CashierController
     }
     public function get_user()
     {
-        $check_user_details    =  Users::where('id', Request::user()->id)->first();
+        $check_user_details    =  User::where('id', Request::user()->id)->first();
         if($check_user_details->type == 'cashier')
         {
-            $get_user_details    =  Users::where('id', Request::user()->id)->join('tbl_cashier', 'tbl_cashier.cashier_user_id', '=', 'users.id')->first();
+            $get_user_details    =  User::where('id', Request::user()->id)->join('tbl_cashier', 'tbl_cashier.cashier_user_id', '=', 'users.id')->first();
             $branch_details = Tbl_branch::where('branch_id', $get_user_details->cashier_branch_id)->first();
             $return['name']  = $get_user_details->name;
             $return['branch_id'] = $get_user_details->cashier_branch_id;
@@ -134,7 +134,7 @@ class CashierItemController extends CashierController
         }
         else
         {
-            $get_user_details    =  Users::where('id', Request::user()->id)->join('tbl_stockist', 'tbl_stockist.stockist_user_id', '=', 'users.id')->first();
+            $get_user_details    =  User::where('id', Request::user()->id)->join('tbl_stockist', 'tbl_stockist.stockist_user_id', '=', 'users.id')->first();
             $branch_details = Tbl_branch::where('branch_id', $get_user_details->stockist_branch_id)->first();
             $return['name']  = $get_user_details->name;
             $return['branch_id'] = $get_user_details->stockist_branch_id;
@@ -220,7 +220,7 @@ class CashierItemController extends CashierController
                 $slot = Slot::create_slot($data, $slot_code);
                 if($slot['status_code'] < 300)
                 {
-                    $buyer = Users::join('tbl_slot', 'tbl_slot.slot_owner', '=', 'users.id')->where('tbl_slot.slot_id', $slot['status_data_id_inc'])->first();
+                    $buyer = User::join('tbl_slot', 'tbl_slot.slot_owner', '=', 'users.id')->where('tbl_slot.slot_id', $slot['status_data_id_inc'])->first();
                     $item['item_id'] = $slot_info['membership_kit'];
                     $item['quantity'] = 1;
                     $item['discounted_price'] = $item_sold->item_price;
@@ -315,7 +315,7 @@ class CashierItemController extends CashierController
 
     public function select_for_slot_creation()
     {
-        $response = Users::where('id', Request::input('user_id'))
+        $response = User::where('id', Request::input('user_id'))
         ->JoinSlot()
         ->leftJoin("tbl_slot as sponsor","sponsor.slot_id","=","tbl_slot.slot_sponsor")
         ->select("tbl_slot.*","users.*","sponsor.slot_no as slot_sponsor_no")
@@ -339,7 +339,7 @@ class CashierItemController extends CashierController
     }
     public function check_stocks()
     {
-        $check_user = Users::where('id', Request::user()->id)->first();
+        $check_user = User::where('id', Request::user()->id)->first();
         if($check_user->type == "cashier")
         {
             $cashier = Tbl_cashier::where('cashier_user_id', Request::user()->id)->first();

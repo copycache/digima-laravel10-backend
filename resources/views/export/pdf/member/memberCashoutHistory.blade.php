@@ -42,9 +42,9 @@
 								<td>{{ date("F j, Y",strtotime($list->wallet_log_date_created))}}</td>
 								<td>{{ $list->cash_out_status == "processing" ||  $list->cash_out_status == "Pending" ? "Processing" : $list->cash_out_date}}</td>
 								<td>{{ $list->cash_out_status}}</td>
-								<td>{{ number_format($list->cash_out_net_payout_actual),2}}</td>
-								<td>{{ number_format($list->cash_out_net_payout_actual - $list->cash_out_net_payout),2}}</td>
-								<td>{{ number_format($list->cash_out_net_payout),2}}</td>
+								<td>{{ number_format($list->cash_out_net_payout_actual, 2) }}</td>
+								<td>{{ number_format($list->cash_out_net_payout_actual - $list->cash_out_net_payout, 2) }}</td>
+								<td>{{ number_format($list->cash_out_net_payout, 2) }}</td>
 							</tr>
 							@endforeach
 						</table>
@@ -56,6 +56,6 @@
 		<br>
 		
 		<br><br><br>
-		<div class="pdf-footer">PDF GENERATED : {{date("F j, Y",strtotime(date('Y-m-d')))}}</div>
+		<div class="pdf-footer">PDF GENERATED : {{ date("F j, Y") }}</div>
 	</body>
 </html>

@@ -17,7 +17,7 @@ use App\Models\Tbl_item;
 use App\Models\Tbl_currency;
 use App\Models\Tbl_top_recruiter;
 use App\Models\Tbl_stairstep_settings;
-use App\Models\Users;
+use App\Models\User;
 
 use App\Globals\Log;
 use App\Globals\Stairstep;
@@ -26,7 +26,7 @@ class Slot_create
 {
     public static function validate_slot_if_retailer($return,$owner_id)
     {
-    	$user = Users::where("id",$owner_id)->first();
+    	$user = User::where("id",$owner_id)->first();
     	if($user)
     	{
     		if($user->registered_as_retailer == 1)
@@ -145,7 +145,7 @@ class Slot_create
 		}
 		else
 		{
-			$check_slot_owner = Users::where('id', $data['slot_owner'])->first();
+			$check_slot_owner = User::where('id', $data['slot_owner'])->first();
 			if(!$check_slot_owner)
 			{
 				$return['status_message'][$return["i"]] = 'No slot owner';

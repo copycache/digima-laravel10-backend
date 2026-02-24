@@ -28,7 +28,7 @@ use App\Models\Tbl_label;
 use App\Models\Tbl_wallet_log;
 use App\Models\Tbl_membership;
 use App\Models\Tbl_audit_trail;
-use App\Models\Users;
+use App\Models\User;
 
 use App\Globals\MLM;
 
@@ -272,7 +272,7 @@ class AdminController extends Controller
     public function get_user_details()
 	{
 
-		$get_position						= Users::where('id',Request::user()->id)->leftjoin('tbl_position','tbl_position.position_id','users.position_id')->first();
+		$get_position						= User::where('id',Request::user()->id)->leftjoin('tbl_position','tbl_position.position_id','users.position_id')->first();
 		if($get_position)
 		{
 			$return         				= strtolower($get_position->position_name ?? 'superadmin');

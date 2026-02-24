@@ -8,7 +8,7 @@ use App\Models\Tbl_cash_in_proofs;
 use App\Models\Tbl_cash_in_method;
 use App\Models\Tbl_cash_in_method_category;
 use App\Models\Tbl_slot;
-use App\Models\Users;
+use App\Models\User;
 use App\Globals\Audit_trail;
 use App\Globals\Log;
 use App\Globals\Currency;

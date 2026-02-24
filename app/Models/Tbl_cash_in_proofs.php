@@ -11,8 +11,7 @@ class Tbl_cash_in_proofs extends Model
 	protected $table = 'tbl_cash_in_proofs';
 	protected $primaryKey = "cash_in_proof_id";
     public $timestamps = false;
-
-	protected $guarded = [];
+    protected $guarded = [];
 
 
     public function scopeMethod($query)

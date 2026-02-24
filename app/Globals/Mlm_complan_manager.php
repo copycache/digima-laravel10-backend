@@ -56,7 +56,7 @@ use App\Models\Tbl_reverse_pass_up_direct_combination_income;
 use App\Models\Tbl_matrix_placement;
 use App\Models\Tbl_unilevel_matrix_bonus_settings;
 use App\Models\Tbl_unilevel_matrix_bonus_levels;
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_membership_unilevel_level;
 use App\Models\Tbl_binary_projected_income_log;
 use App\Models\Tbl_leaders_support_log;
@@ -2533,7 +2533,7 @@ class Mlm_complan_manager
 
         $ungained_levels = array_diff($all_levels, $gained_level);
         $commission_ungained = 0;
-        $company_account = Users::where("company_account", 1)->JoinSlot()->first();
+        $company_account = User::where("company_account", 1)->JoinSlot()->first();
         if($company_account) {
             foreach($ungained_levels as $level) {
                 if($plan == "matrix") {

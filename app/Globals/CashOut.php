@@ -14,7 +14,7 @@ use App\Models\Tbl_slot;
 use App\Models\Tbl_other_settings;
 use App\Models\Tbl_currency;
 use App\Models\Tbl_service_charge;
-use App\Models\Users;
+use App\Models\User;
 use App\Globals\Log;
 use App\Globals\CashIn;
 use App\Globals\Audit_trail;
@@ -800,7 +800,7 @@ class CashOut
 		if($payout_method)
 		{
 			$slot = Tbl_slot::where('slot_no', $data['slot_no'])->first();
-			$slot_owner = Users::where('id', $slot->slot_owner)->first();
+			$slot_owner = User::where('id', $slot->slot_owner)->first();
 
 			$pass['slot_id']							= $slot->slot_id;
 			$pass["cash_out_method_id"] 				= $payout_method->method_id;
@@ -1253,7 +1253,7 @@ class CashOut
 		foreach ($list['list'] as $key => $value) {
 
 			$slot = Tbl_slot::where("slot_no" ,$value->cash_out_slot_code)->first();
-			$value->team_name = Users::where("id",$slot->slot_owner)->first()->team_name;
+			$value->team_name = User::where("id",$slot->slot_owner)->first()->team_name;
 		}
 		$list['total'] = Tbl_cash_out_list::Method()->where("schedule_id", $filter['id'])->sum('cash_out_net_payout');
 		return $list;

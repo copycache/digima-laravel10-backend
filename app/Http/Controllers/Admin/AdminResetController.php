@@ -2,7 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Tbl_slot;
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_wallet_log;
 use App\Globals\Audit_trail;
 use App\Globals\Tbl_vortex_slot;
@@ -81,7 +81,7 @@ class AdminResetController extends AdminController
 			{
 				if($slot_list == true)
 				{
-					Users::where([
+					User::where([
 						['type', '=', 'member'],
 						['type', '=', 'cashier'],
 					])->delete();
