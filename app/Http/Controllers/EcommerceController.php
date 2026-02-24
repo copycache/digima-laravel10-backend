@@ -1,159 +1,135 @@
 <?php
-/*
-|--------------------------------------------------------------------------
-| CONTROLLER COLLABORATOR
-|--------------------------------------------------------------------------
-|
-| JAMES OMOSORA
-|
-*/
+
 namespace App\Http\Controllers;
-use App\Http\Controllers\FrontController;
-use Carbon\Carbon;
-use App\Globals\Digima;
-use App\Models\Tbl_slot;
-use App\Models\Tbl_item;
-use App\Models\Tbl_earning_log;
-use App\Models\Users;
-use App\Models\Tbl_cart;
-use Illuminate\Support\Facades\Request;
-use Response;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
 
 use App\Globals\Cart;
+use App\Models\Tbl_item;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EcommerceController extends FrontController
 {
     public function index()
     {
         $data["Page"]       = "Home";
-        $data['services']   = Tbl_item::where('item_type','non_inventory')->where('archived',0)->where('item_category','services')->get();
-        $data['property']   = Tbl_item::where('item_type','non_inventory')->where('archived',0)->where('item_category','property')->get();
-        $data['other_product']   = Tbl_item::where('item_type','non_inventory')->where('archived',0)->where('item_category','other_product')->get();
-        $data['product']    = Tbl_item::where('item_type','product')->where('archived',0)->get();
+        $items = Tbl_item::whereIn('item_type', ['non_inventory', 'product'])
+                         ->where('archived', 0)
+                         ->get();
+
+        $data['services']      = $items->where('item_category', 'services');
+        $data['property']      = $items->where('item_category', 'property');
+        $data['other_product'] = $items->where('item_category', 'other_product');
+        $data['product']       = $items->where('item_type', 'product');
 
         return view ("ecommerce.pages.home", $data);
     }
 
     public function products($type)
     {
-        $data["Page"]        = "Product Page";
-        if($type == 'services'):
-            $search_key      = "SERVICES";
-            $data['_item']   = Tbl_item::where('item_type','non_inventory')->where('archived',0)->where('item_category','services')->get();
-        elseif($type == 'property'):
-            $search_key      = "REAL STATE";
-            $data['_item']   = Tbl_item::where('item_type','non_inventory')->where('archived',0)->where('item_category','property')->get();
-        elseif($type == 'product'):
-            $search_key      = "GAMES";
-            $data['_item']    = Tbl_item::where('item_type','product')->where('archived',0)->get();
-        elseif($type == 'search'):
-            $search_key      = Request('search_key');
-            $data['_item']   = Tbl_item::Search($search_key)->where('item_type','!=','membership_kit')->where('archived',0)->get();
-        else:
-            dd("DO NOT TRY TO EDIT THE LINK!");
-        endif;
-        $data['type']       = $type;
-        $data['header']     = "Showing <b>".count($data['_item'])."</b> results related to <b>'".strtoupper($search_key)."'</b>";
+        $search_key = match($type) {
+            'services' => 'SERVICES',
+            'property' => 'REAL STATE',
+            'product' => 'GAMES',
+            'search' => request('search_key'),
+            default => abort(404, 'DO NOT TRY TO EDIT THE LINK!')
+        };
 
+        $query = Tbl_item::where('archived', 0);
         
-        return view ("ecommerce.pages.product",$data);
+        if ($type === 'search') {
+            $items = $query->Search($search_key)->where('item_type', '!=', 'membership_kit')->get();
+        } elseif ($type === 'product') {
+            $items = $query->where('item_type', 'product')->get();
+        } else {
+            $items = $query->where('item_type', 'non_inventory')->where('item_category', $type)->get();
+        }
+
+        return view('ecommerce.pages.product', [
+            'Page' => 'Product Page',
+            '_item' => $items,
+            'type' => $type,
+            'header' => "Showing <b>" . count($items) . "</b> results related to <b>'" . strtoupper($search_key) . "'</b>"
+        ]);
     }
     
     public function product_view($item_id)
     {
-        $data["Page"]       = "Product View";
-        $data['item']       = Tbl_item::where('item_id',$item_id)->where('archived',0)->first();
-        $data['product']    = Tbl_item::where('item_type','product')->where('archived',0)->get();
-        return view ("ecommerce.pages.product-view", $data);
+        return view('ecommerce.pages.product-view', [
+            'Page' => 'Product View',
+            'item' => Tbl_item::where(['item_id' => $item_id, 'archived' => 0])->first(),
+            'product' => Tbl_item::where(['item_type' => 'product', 'archived' => 0])->get()
+        ]);
     }
 
-    //POPUPS
-    public function cart_item()
+    public function cart_item(Request $request)
     {
-        $data["Page"]   = "Cart Modal";
-        $request        = Request();
-        $item_id        = Request('item_id');
-        $quantity       = Request('quantity');
-        $sub_total      = 0;
-        if($item_id && $quantity)
-        {
+        $item_id = $request->input('item_id');
+        $quantity = $request->input('quantity');
+
+        if ($item_id && $quantity) {
             Cart::add_cart($request);
         }
 
         $cart = Cart::get_cart();
+        $sub_total = 0;
 
-        foreach($cart as $key=>$carts)
-        {
-            $cart[$key]['item_quantity']    = $carts['cart_item_quantity'];
-            $cart[$key]['item_total']       = $carts['item_price'] * $carts['cart_item_quantity'];
-            $sub_total                      = $sub_total + $cart[$key]['item_total'];
+        foreach ($cart as $key => $item) {
+            $cart[$key]['item_quantity'] = $item['cart_item_quantity'];
+            $cart[$key]['item_total'] = $item['item_price'] * $item['cart_item_quantity'];
+            $sub_total += $cart[$key]['item_total'];
         }
-        $data['sub_total'] = $sub_total;
-        $data['cart']      = $cart;
 
-
-        return view ("ecommerce.popups.my-cart", $data);
+        return view('ecommerce.popups.my-cart', [
+            'Page' => 'Cart Modal',
+            'sub_total' => $sub_total,
+            'cart' => $cart
+        ]);
     }
 
-    public function cart_item_remove()
+    public function cart_item_remove(Request $request)
     {
-        Cart::remove_item(Request::input('item_id'));
+        Cart::remove_item($request->input('item_id'));
 
         $cart = Cart::get_cart();
         $sub_total = 0;
-        foreach($cart as $key=>$carts)
-        {
-            $cart[$key]['item_quantity']    = $carts['cart_item_quantity'];
-            $cart[$key]['item_total']       = $carts['item_price'] * $carts['cart_item_quantity'];
-            $sub_total                      = $sub_total + $cart[$key]['item_total'];
+
+        foreach ($cart as $key => $item) {
+            $cart[$key]['item_quantity'] = $item['cart_item_quantity'];
+            $cart[$key]['item_total'] = $item['item_price'] * $item['cart_item_quantity'];
+            $sub_total += $cart[$key]['item_total'];
         }
-        $data['sub_total'] = $sub_total;
-        $data['cart']      = $cart;
 
         return $sub_total;
     }
 
-    public function cart_item_chage_quantity()
+    public function cart_item_chage_quantity(Request $request)
     {
-        $request    = Request::all();
-        Cart::add_cart($request);
+        Cart::add_cart($request->all());
     }
 
-    public function product_request_qoute()
+    public function product_request_qoute(Request $request)
     {
-        $data["Page"]       = "Request a Qoute";
-        if(Request::isMethod('post'))
-        {
-            $input = Request::all();
-            if(isset($input['name']) || isset($input['email']) || isset($input['phone']) || isset($input['message']))
-            {
-                $insert['qoute_request_name']     = $input['name'];
-                $insert['qoute_request_email']    = $input['email'];
-                $insert['qoute_request_phone']    = $input['phone'];
-                $insert['qoute_request_message']  = $input['message'];
-                $insert['qoute_request_item_id']  = $input['item_id'];
-                DB::table('tbl_qoute_request')->insert($insert);
+        if ($request->isMethod('post')) {
+            $input = $request->all();
+            
+            if (isset($input['name'], $input['email'], $input['phone'], $input['message'])) {
+                DB::table('tbl_qoute_request')->insert([
+                    'qoute_request_name' => $input['name'],
+                    'qoute_request_email' => $input['email'],
+                    'qoute_request_phone' => $input['phone'],
+                    'qoute_request_message' => $input['message'],
+                    'qoute_request_item_id' => $input['item_id']
+                ]);
+                return 'SUCCESS';
+            }
+            return 'ERROR';
+        }
 
-                $view  = "SUCCESS";
-            }
-            else
-            {
-                $view  = "ERROR";
-            }
-        }
-        else
-        {
-            $view =  view ("ecommerce.popups.request-qoute", $data);
-        }
-        return $view;
+        return view('ecommerce.popups.request-qoute', ['Page' => 'Request a Qoute']);
     }
 
     public function product_request_qoute_success()
     {
-        $data["Page"] = "Request a Qoute Success";
-        return view ("ecommerce.popups.request-qoute-success", $data);
+        return view('ecommerce.popups.request-qoute-success', ['Page' => 'Request a Qoute Success']);
     }
-    //END POPUPS
 }

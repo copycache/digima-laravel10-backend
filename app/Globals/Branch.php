@@ -9,7 +9,7 @@ use App\Models\Tbl_branch;
 use App\Models\Tbl_cashier;
 use App\Models\Tbl_inventory;
 use App\Models\Tbl_item;
-use App\Models\Users;
+use App\Models\User;
 
 use App\Models\Tbl_codes;
 use Validator;
@@ -72,8 +72,8 @@ class Branch
 				$insert_stockist_user["country_id"]	    	= 1;
 				$insert_stockist_user["name"]	            = $data["branch_first_name"]." ".$data["branch_last_name"];
 				
-				$stockist_user_id = Users::insertGetId($insert_stockist_user);
-				$new['stockist_user'] = Users::where('id',$stockist_user_id)->first();
+				$stockist_user_id = User::insertGetId($insert_stockist_user);
+				$new['stockist_user'] = User::where('id',$stockist_user_id)->first();
 				if(is_numeric($stockist_user_id))
 				{
 					$insert_stockist['stockist_user_id']		= $stockist_user_id;
@@ -230,7 +230,7 @@ class Branch
 			$update_stockist_user["country_id"]	    	= 1;
 			$update_stockist_user["name"]	            = $data["first_name"]." ".$data["last_name"];
 			
-			Users::where('id',$data['id'])->update($update_stockist_user);
+			User::where('id',$data['id'])->update($update_stockist_user);
 
 			$update_stockist['stockist_level']			= $data['stockist_level'];
 			

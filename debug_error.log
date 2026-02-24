@@ -1,0 +1,17 @@
+Expected response status code [200] but received 500.
+Failed asserting that 500 is identical to 200.
+#0 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\Constraint\IsIdentical.php(78): PHPUnit\Framework\Constraint\Constraint->fail(500, 'Expected respon...', NULL)
+#1 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\Assert.php(1870): PHPUnit\Framework\Constraint\IsIdentical->evaluate(500, 'Expected respon...')
+#2 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\Assert.php(982): PHPUnit\Framework\Assert::assertThat(500, Object(PHPUnit\Framework\Constraint\IsIdentical), 'Expected respon...')
+#3 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php(148): PHPUnit\Framework\Assert::assertSame(200, 500, 'Expected respon...')
+#4 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\tests\Feature\ExampleTest.php(17): Illuminate\Testing\TestResponse->assertStatus(200)
+#5 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\TestCase.php(1548): Tests\Feature\ExampleTest->test_the_application_returns_a_successful_response()
+#6 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\TestCase.php(686): PHPUnit\Framework\TestCase->runTest()
+#7 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\TestRunner.php(106): PHPUnit\Framework\TestCase->runBare()
+#8 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\TestCase.php(516): PHPUnit\Framework\TestRunner->run(Object(Tests\Feature\ExampleTest))
+#9 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\Framework\TestSuite.php(374): PHPUnit\Framework\TestCase->run()
+#10 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(64): PHPUnit\Framework\TestSuite->run()
+#11 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\src\TextUI\Application.php(204): PHPUnit\TextUI\TestRunner->run(Object(PHPUnit\TextUI\Configuration\Configuration), Object(PHPUnit\Runner\ResultCache\DefaultResultCache), Object(PHPUnit\Framework\TestSuite))
+#12 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\phpunit\phpunit\phpunit(104): PHPUnit\TextUI\Application->run(Array)
+#13 C:\Users\Digima\Documents\IQONELITE\digima-laravel10-backend\vendor\bin\phpunit(122): include('C:\\Users\\Digima...')
+#14 {main}

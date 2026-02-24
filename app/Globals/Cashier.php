@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Request;
 use App\Models\Tbl_cashier;
 use App\Models\Tbl_inventory;
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_item;
 use App\Models\Tbl_orders;
 use App\Models\Tbl_cashier_sales;
@@ -140,12 +140,12 @@ class Cashier
 		$update_cashier['cashier_status']			=	$data['cashier_status'];
 
 		$old['cashier']  = Tbl_cashier::where('cashier_id', $data['cashier_id'])->first();
-		$old['user']     = Users::where('id', $data['id'])->first();
+		$old['user']     = User::where('id', $data['id'])->first();
 
 		Tbl_cashier::where('cashier_id', $data['cashier_id'])->update($update_cashier);
-		Users::where('id', $data['id'])->update($update_user);
+		User::where('id', $data['id'])->update($update_user);
 		$new['cashier']  = Tbl_cashier::where('cashier_id', $data['cashier_id'])->first();
-		$new['user']     = Users::where('id', $data['id'])->first();
+		$new['user']     = User::where('id', $data['id'])->first();
 		$action  		 = "Update_cashier";
 		$user            = Request::user()->id;
 		Audit_trail::audit(serialize($old),serialize($new),$user,$action);

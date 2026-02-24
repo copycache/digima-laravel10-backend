@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Tbl_slot;
 use App\Models\Tbl_user_process;
 use App\Mail\ResetPassword;
@@ -13,17 +14,17 @@ use Hash;
 use Carbon\Carbon;
 use App\Globals\Log;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 class ForgotPasswordController extends Controller
 {
      public function send_mail(Request $request)
     {
         $email                       = $request->email;
-        $data                        = DB::table('users')->where('email',$email)->first(['id','name']);
+        $data                        = User::where('email',$email)->first(['id','name']);
         
         if($data != null && $email != null)	
         {
-        	$random = str_shuffle('abcdefghjklmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ1234567890');
-			$OTP = substr($random, 0, 8);
+            $OTP = Str::random(8);
 
             $id                       = Crypt::encrypt($data->id);
             $decryt_id                = $data->id;
@@ -128,7 +129,7 @@ class ForgotPasswordController extends Controller
 	            {
 	                $update["password"]       = Hash::make($confirm);
 	                $update["crypt"]          = Crypt::encryptString($confirm);
-	                DB::table('users')->where('id',$id)->update($update);
+	                User::where('id',$id)->update($update);
 	                $return["status"]         = "success";
 	                $return["status_code"]    = 200;
 	                $return["status_message"] = "Password updated successfully";

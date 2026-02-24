@@ -12,8 +12,7 @@ class Tbl_ai_marketing_tools extends Model
 
 	protected $primaryKey = "id";
     public $timestamps = false;
-
-	protected $guarded = [];
+    protected $guarded = [];
 
 	public function scopeCategory($query)
     {

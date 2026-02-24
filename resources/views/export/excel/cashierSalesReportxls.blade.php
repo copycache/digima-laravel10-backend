@@ -52,8 +52,8 @@
                     </td>
                     <td class="text-center text-secondary v-align-middle">PHP {{$list['subtotal'] }}</td>
                     <td class="text-center text-secondary v-align-middle">{{$list['tax_amount'] == 0 ? '0' : '12%'}}</td>
-                    <td class="text-center text-secondary v-align-middle">PHP {{$list['tax_amount'] | number : '1:2-2'}}</td>
-                    <td class="text-center text-secondary v-align-middle">PHP {{$list['grand_total'] }}</td>
+                    <td class="text-center text-secondary v-align-middle">PHP {{ number_format($list['tax_amount'], 2) }}</td>
+                    <td class="text-center text-secondary v-align-middle">PHP {{ $list['grand_total'] }}</td>
                 </tr>
                 @endforeach
             </table>
@@ -66,7 +66,7 @@
         <div class="table-footer-container">
             <table>
                 <tr>
-                    <td colspan="6">Excel Generated : {{date("F j, Y",strtotime(date('Y-m-d')))}}</td>
+                    <td colspan="6">Excel Generated : {{ date("F j, Y") }}</td>
                 </tr>
             </table>
 			

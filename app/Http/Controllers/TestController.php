@@ -17,7 +17,7 @@ use App\Globals\Eloading;
 use App\Globals\Audit_trail;
 use App\Globals\Special_plan;
 
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_slot;
 use App\Models\Tbl_mlm_board_placement;
 use App\Models\Tbl_other_settings;
@@ -70,24 +70,29 @@ class TestController extends Controller
         $ctr   = 1;
         $total = 0;
 
-       foreach($data as $d)
-       {
-            $slot = Tbl_slot::where("slot_id",$d->wallet_log_slot_id)->owner()->first();
+        $slot_ids = $data->pluck('wallet_log_slot_id')->unique();
+        $slots = Tbl_slot::whereIn('slot_id', $slot_ids)->owner()->get()->keyBy('slot_id');
 
-            echo '<tr>';
-            echo '<td style="text-align:center">'.$ctr.'</td>';
-            echo '<td style="text-align:center">'.$slot->slot_id.'</td>';
-            echo '<td style="text-align:center">'.$slot->slot_no.'</td>';
-            echo '<td style="text-align:center">'.$slot->email.'</td>';
-            echo '<td style="text-align:center">'.$slot->first_name." ".$slot->middle_name." ".$slot->last_name.'</td>';
-            echo '<td style="text-align:center">'.$d->ctr.'</td>';
-            echo '<td style="text-align:center">'.$d->wallet_log_date_created.'</td>';
-            echo '<td style="text-align:center">'.$d->wallet_log_amount.'</td>';
-            echo '</tr>';
-            
-            $total = $total + ($d->wallet_log_amount * ( $d->ctr - 1));
-            $ctr++;
-       }  
+        foreach($data as $d)
+        {
+             $slot = $slots->get($d->wallet_log_slot_id);
+
+             if ($slot) {
+                 echo '<tr>';
+                 echo '<td style="text-align:center">'.$ctr.'</td>';
+                 echo '<td style="text-align:center">'.$slot->slot_id.'</td>';
+                 echo '<td style="text-align:center">'.$slot->slot_no.'</td>';
+                 echo '<td style="text-align:center">'.$slot->email.'</td>';
+                 echo '<td style="text-align:center">'.$slot->first_name." ".$slot->middle_name." ".$slot->last_name.'</td>';
+                 echo '<td style="text-align:center">'.$d->ctr.'</td>';
+                 echo '<td style="text-align:center">'.$d->wallet_log_date_created.'</td>';
+                 echo '<td style="text-align:center">'.$d->wallet_log_amount.'</td>';
+                 echo '</tr>';
+                 
+                 $total = $total + ($d->wallet_log_amount * ( $d->ctr - 1));
+                 $ctr++;
+             }
+        }  
 
         echo '    </tbody>';
         echo '</table>';    

@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 use App\Models\Tbl_slot;
 use App\Models\Tbl_other_settings;
+use App\Models\User;
 use App\Models\Tbl_dealer;
 use App\Models\Tbl_retailer;
 use App\Models\Tbl_item;
@@ -118,9 +119,12 @@ class RegisterController extends Controller
 
     public function get_register_settings()
     {
-        $response["facebook"] = Tbl_other_settings::where("key","register_facebook")->first();
-        $response["google"]   = Tbl_other_settings::where("key","register_google")->first();
-        $response["registration_activation"]   = Tbl_other_settings::where("key","registration_with_activation")->first();
+        $keys = ["register_facebook", "register_google", "registration_with_activation"];
+        $settings = Tbl_other_settings::whereIn("key", $keys)->get()->keyBy('key');
+        
+        $response["facebook"] = $settings->get("register_facebook");
+        $response["google"]   = $settings->get("register_google");
+        $response["registration_activation"]   = $settings->get("registration_with_activation");
         
         return json_encode($response);
     }
@@ -168,7 +172,7 @@ class RegisterController extends Controller
         {
             $response = Tbl_slot::where('slot_no',$slot_no)
                       ->leftjoin('users','users.id','=','tbl_slot.slot_owner')
-                      ->select('slot_no','first_name','middle_name','last_name')
+                      ->select('slot_no','first_name','middle_name','last_name', 'email')
                       ->first();
         }
         else

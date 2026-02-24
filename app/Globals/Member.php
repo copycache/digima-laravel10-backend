@@ -1,7 +1,7 @@
 <?php
 namespace App\Globals;
 use App\Globals\Audit_trail;
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_slot;
 use App\Models\Tbl_currency;
 use App\Models\Tbl_wallet;
@@ -33,7 +33,7 @@ class Member
 {
 	public static function get($type = "member", $search = null, $member_active = null)
 	{
-		// $return = Users::where("type",$type)->where('id','!=',Request::user()->id);
+		// $return = User::where("type",$type)->where('id','!=',Request::user()->id);
 
 		// if(isset($search))
 		// {
@@ -44,7 +44,7 @@ class Member
 		
 		// return $return;
 
-		$return = Users::where("type",$type)->where('users.id','!=',Request::user()->id)
+		$return = User::where("type",$type)->where('users.id','!=',Request::user()->id)
 				->where('name','!=','Administrator')
 				->leftjoin('tbl_slot','tbl_slot.slot_owner','users.id')
 				->where('tbl_slot.slot_no','!=','root')
@@ -178,7 +178,7 @@ class Member
 				$dealers_error = "Dealer's link not found...";
 			}
 		}
-		$check_if_fullname_exist = Users::where("first_name",$data["first_name"])->where("middle_name",$data["middle_name"])->where("last_name",$data["last_name"])->first();
+		$check_if_fullname_exist = User::where("first_name",$data["first_name"])->where("middle_name",$data["middle_name"])->where("last_name",$data["last_name"])->first();
 		$check_other_setting = Tbl_other_settings::where("key","allow_duplicated_name")->first() ? Tbl_other_settings::where("key","allow_duplicated_name")->first()->value : $check_other_setting = null;
 		$validator = Validator::make($data, $rules, $messages);
 		$validator2 = Validator::make($data, $rules2, $messages2);
@@ -275,7 +275,7 @@ class Member
 				$insert["password"]					= Hash::make($data["social_id"]);
 			}
 
-			$status_data_id = Users::insertGetId($insert);
+			$status_data_id = User::insertGetId($insert);
 			$slot_limit     = Tbl_other_settings::where("key","default_slot_limit")->first() ? Tbl_other_settings::where("key","default_slot_limit")->first()->value : 0;
 			$insert_limit["user_id"] 		  = $status_data_id;
 			$insert_limit["active_slots"]	  = 0;
@@ -309,13 +309,13 @@ class Member
 
 
 			already_create:
-			$status_data_name = Users::where('id',$status_data_id)->first();
+			$status_data_name = User::where('id',$status_data_id)->first();
 
 			//audit trail
 			if(isset($data['user']))
 			{
 				$action = 'Create Member';
-				$member = Users::where('id',$status_data_id)->first();
+				$member = User::where('id',$status_data_id)->first();
 				Audit_trail::audit(null,serialize($member),$data['user']['id'],$action);
 			}
 
@@ -332,7 +332,7 @@ class Member
 
 	public static function check_credentials($member)
 	{
-		$password = Users::where("social_id", $member)->first();
+		$password = User::where("social_id", $member)->first();
 		if($password)
 		{
 			return Crypt::decryptString($password->crypt);
@@ -436,7 +436,7 @@ class Member
 		$cashier = Tbl_cashier::where('cashier_user_id', Request::user()->id)->first();
 		if($cashier->cashier_position == 'Manager')
 		{
-			$cashier_user 		= Users::where('id', $cashier->cashier_user_id)->first();
+			$cashier_user 		= User::where('id', $cashier->cashier_user_id)->first();
 			$encrypted_password = Crypt::decryptString($cashier_user->crypt);
 			if($encrypted_password == $password)
 			{
@@ -479,7 +479,7 @@ class Member
 
 	public static function slot_info($type = "member", $search = null)
 	{
-		$query = Users::where(function($two)  use ($type) {$two->where('type', $type)->orWhere('type','=','admin');});
+		$query = User::where(function($two)  use ($type) {$two->where('type', $type)->orWhere('type','=','admin');});
 
 		if(isset($search))
 		{
@@ -495,7 +495,7 @@ class Member
 	{
 		if($id)
 		{
-			$response = Users::where('id',$id)->first()->id;
+			$response = User::where('id',$id)->first()->id;
 		}
 		return $response;
 	}
@@ -526,7 +526,7 @@ class Member
 			$update['valid_id'] = 'https://image.flaticon.com/icons/svg/71/71619.svg';
 		}
 
-		Users::where('id', $data['id'])->update($update);
+		User::where('id', $data['id'])->update($update);
 
 		$response['status'] = 'success';
 		$response['id'] = $data['id'];
@@ -611,7 +611,7 @@ class Member
 				$dealers_error = "Dealer's link not found...";
 			}
 		}
-		$check_if_fullname_exist = Users::where("first_name",$data["first_name"])->where("middle_name",$data["middle_name"])->where("last_name",$data["last_name"])->first();
+		$check_if_fullname_exist = User::where("first_name",$data["first_name"])->where("middle_name",$data["middle_name"])->where("last_name",$data["last_name"])->first();
 		$check_other_setting = Tbl_other_settings::where("key","allow_duplicated_name")->first() ? Tbl_other_settings::where("key","allow_duplicated_name")->first()->value : $check_other_setting = null;
 		$validator = Validator::make($data, $rules, $messages);
 		$validator2 = Validator::make($data, $rules2, $messages2);

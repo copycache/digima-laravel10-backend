@@ -6,7 +6,7 @@ use App\Globals\Audit_trail;
 use App\Globals\Seed;
 use App\Globals\Log;
 
-use App\Models\Users;
+use App\Models\User;
 use App\Models\Tbl_currency;
 use App\Models\Tbl_label;
 use App\Models\Tbl_wallet_log;
@@ -277,7 +277,7 @@ class AdminMaintenanceController extends AdminController
 
 	public function get_admin()
 	{
-		$return = Users::JoinPosition()->where('type','admin')->get();
+		$return = User::JoinPosition()->where('type','admin')->get();
 
 
 		foreach ($return as $key => $value) 

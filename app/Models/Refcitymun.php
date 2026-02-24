@@ -1,17 +1,18 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Refcitymun extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
 	protected $table = 'refcitymun';
 
-	protected $primaryKey = "id";
-    public $timestamps = false;
+	protected $primaryKey = 'id';
+
+	public $timestamps = false;
 
 	protected $guarded = [];
 }

@@ -42,7 +42,7 @@ use App\Models\Tbl_unilevel_items;
 use App\Models\Tbl_wallet;
 use App\Models\Tbl_retailer_override;
 
-use App\Models\Users;
+use App\Models\User;
 use Carbon\Carbon;
 use DB;
 use Request;
@@ -1440,7 +1440,7 @@ class Item
                     $payable = $payable + $item_price;
                     if ($from == "stockist") {
                         $check_buyer = Tbl_slot::where('slot_id', $customer->slot_id)->first()->slot_owner;
-                        $buyer_user_info = Users::where('id', $check_buyer)->first();
+                        $buyer_user_info = User::where('id', $check_buyer)->first();
                         if ($buyer_user_info->type == 'stockist') {
                             //no discount
                             $item_price = $item[$key]['item_gc_price'] * $value->quantity;
@@ -1539,7 +1539,7 @@ class Item
     }
     public static function recount_inventory()
     {
-        $check_user = Users::where('id', Request::user()->id)->first();
+        $check_user = User::where('id', Request::user()->id)->first();
         if ($check_user->type == "cashier") {
             $cashier = Tbl_cashier::where('cashier_user_id', $check_user->id)->first();
             $inventory = Tbl_inventory::where('inventory_branch_id', $cashier->cashier_branch_id)->get();
