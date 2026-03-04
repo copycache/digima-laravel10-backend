@@ -63,7 +63,6 @@ class AdminDashboardController extends AdminController
 	{
 		$months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 		$return['member']['chartType'] = 'ColumnChart';
-		$calcview = 0;
 		$year = Carbon::now()->year;
 		$results = User::whereYear('created_at', $year)
 			->where('type', 'member')
@@ -72,8 +71,10 @@ class AdminDashboardController extends AdminController
 			->pluck('count', 'month')
 			->all();
 
+		// Header row is required by arrayToDataTable as the first element
+		$return['member']['dataTable'][] = ['Month', 'New Members'];
 		foreach ($months as $key => $value) {
-			$return['member']['dataTable'][] = [$value, $results[$key + 1] ?? 0];
+			$return['member']['dataTable'][] = [$value, (int) ($results[$key + 1] ?? 0)];
 		}
 		$return['member']['options'] = ['title' => 'New Members', 'height' => '500'];
 		return response()->json($return);
@@ -82,6 +83,7 @@ class AdminDashboardController extends AdminController
 	public function sales_chart_data()
 	{
 		$months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+		$return['sales']['chartType'] = 'ColumnChart';
 		$year = Carbon::now()->year;
 		$results = Tbl_receipt::whereYear('receipt_date_created', $year)
 			->selectRaw('MONTH(receipt_date_created) as month, sum(grand_total) as total')
@@ -89,8 +91,10 @@ class AdminDashboardController extends AdminController
 			->pluck('total', 'month')
 			->all();
 
+		// Header row is required by arrayToDataTable as the first element
+		$return['sales']['dataTable'][] = ['Month', 'Sales'];
 		foreach ($months as $key => $value) {
-			$return['sales']['dataTable'][] = [$value, $results[$key + 1] ?? 0];
+			$return['sales']['dataTable'][] = [$value, (float) ($results[$key + 1] ?? 0)];
 		}
 		$return['sales']['options'] = ['title' => 'Sales', 'height' => '500'];
 		return response()->json($return);

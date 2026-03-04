@@ -80,6 +80,8 @@ class Code
 				$insert['code_inventory_id'] = $inventory->inventory_id;
 				$insert['code_activation'] = $code[$ctr]['activation'];
 				$insert['code_pin'] = $code[$ctr]['pin'];
+				$insert['code_used'] = 0;
+				$insert['code_sold'] = 0;
 				Tbl_codes::insert($insert);
 			} else {
 				$ctr--;
@@ -103,6 +105,7 @@ class Code
 			$inventory_default['inventory_status'] = null;
 			$inventory_default['inventory_item_id'] = $item_id;
 			$inventory_default['inventory_quantity'] = 0;
+			$inventory_default['inventory_sold'] = 0;
 
 			Tbl_inventory::insert($inventory_default);
 		}
